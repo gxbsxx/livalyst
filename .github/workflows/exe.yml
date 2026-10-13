@@ -55,5 +55,13 @@ jobs:
         env: { GH_TOKEN: '${{ github.token }}' }
         run: |
           V="v$(node -p "require('./package.json').version")"
-          if gh release view "$V" > /dev/null 2>&1; then echo "$V ya estaba publicada"; exit 0; fi
-          gh release create "$V" dist/Livalyst.zip --target "$GITHUB_SHA" --title "Livalyst $V" --notes "Descarga Livalyst.zip, descomprímelo y abre Livalyst.exe. No hace falta instalar nada."
+          # título y explicación: los del commit si empieza por «Livalyst 1.N …» (primera línea y resto)
+          git log -1 --format=%s > ../titulo.txt; git log -1 --format=%b > ../notas.txt
+          printf '\n**Cómo usarlo:** descarga Livalyst.zip, descomprímelo y abre Livalyst.exe. No hace falta instalar nada.\n' >> ../notas.txt
+          T=$(cat ../titulo.txt); case "$T" in "Livalyst ${V#v}"*) ;; *) T="Livalyst $V";; esac
+          if gh release view "$V" > /dev/null 2>&1; then
+            # ya publicada: solo se pone al día si aún tiene el título genérico
+            [ "$(gh release view "$V" --json name -q .name)" = "Livalyst $V" ] && [ "$T" != "Livalyst $V" ] && gh release edit "$V" --title "$T" --notes-file ../notas.txt
+            echo "$V ya estaba publicada"; exit 0
+          fi
+          gh release create "$V" dist/Livalyst.zip --target "$GITHUB_SHA" --title "$T" --notes-file ../notas.txt
