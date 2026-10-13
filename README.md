@@ -24,11 +24,8 @@ Chat unificado, alertas y metas para OBS. Junta en un solo sitio el chat y los e
 Tus ajustes se guardan aparte (en `%APPDATA%\Livalyst`), así que actualizar la app no los borra.
 
 ## Comprobar que todo funciona
-En la carpeta del programa `Alt + D` escribes `cmd` y dentro
 
-```
-npm test
-```
+Haz doble clic en **Comprobar Livalyst.bat**, en la carpeta del programa. Revisa los archivos, abre Livalyst si está cerrado y comprueba que arranca y que todas sus páginas responden. Al final dice «Todo funciona correctamente» o qué falla.
 
 ## Licencia
 
