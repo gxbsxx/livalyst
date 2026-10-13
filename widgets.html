@@ -7,17 +7,26 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&display=swap">
 <style>
   :root { --ink: #15132a; --panel: #1e1b36; --raise: #26224a; --line: #2f2a4d; --text: #eeeaff; --mut: #a49cc8;
-    --pink: #fe2c55; --cyan: #25f4ee; --head: "Bricolage Grotesque", system-ui, sans-serif; }
+    --pink: #fe2c55; --cyan: #25f4ee; --head: "Bricolage Grotesque", system-ui, sans-serif; --ease: cubic-bezier(.2, .8, .2, 1); }
+  @keyframes rise { from { opacity: 0; transform: translateY(10px); } }
+  /* al abrir la página, las tarjetas entran una detrás de otra (una sola vez) */
+  body.opening .card, body.opening aside > * { animation: rise .5s var(--ease) both; animation-delay: calc(var(--i, 0) * 45ms); }
+  @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
   * { box-sizing: border-box; }
   body { margin: 0; background: var(--ink); color: var(--text); font: 14px/1.45 system-ui, "Segoe UI", sans-serif; }
   :focus-visible { outline: 2px solid var(--cyan); outline-offset: 2px; }
   a { color: var(--cyan); }
 
   header { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; padding: 14px 24px; border-bottom: 1px solid var(--line); }
-  h1 { margin: 0; font: 800 24px/1 var(--head); letter-spacing: -.01em; }
-  h1 span { color: var(--pink); text-shadow: -1px 0 var(--cyan); }
+  h1 { display: flex; align-items: center; gap: 10px; margin: 0; font: 800 24px/1 var(--head); letter-spacing: -.01em; }
+  h1 svg { width: 34px; height: 34px; flex: none; transition: transform .4s var(--ease); }
+  h1:hover svg { transform: rotate(-6deg) scale(1.06); }
+  h1 .wm { font-weight: inherit; }
+  h1 .wm span { color: var(--pink); text-shadow: -1px 0 var(--cyan); }
   .sub { color: var(--mut); font: 600 15px var(--head); }
-  #saved { margin-left: auto; padding: 5px 12px; border-radius: 99px; background: var(--panel); color: var(--mut); font-size: 12px; }
+  #saved { margin-left: auto; padding: 5px 12px; border-radius: 99px; background: var(--panel); color: var(--mut); font-size: 12px; transition: color .2s, background .2s; }
+  #saved.pop { animation: pop .45s var(--ease); }
+  @keyframes pop { 40% { transform: scale(1.08); } }
   #saved.on { color: var(--cyan); }
   #saved.bad { background: #4a1426; color: #ffb3c2; font-weight: 600; }
 
@@ -25,14 +34,18 @@
   @media (max-width: 980px) { main { grid-template-columns: 1fr; } aside { position: static !important; order: -1; } }
 
   /* pestañas */
-  [role=tablist] { display: flex; gap: 4px; margin-bottom: 16px; border-bottom: 1px solid var(--line); }
-  [role=tab] { padding: 10px 16px; border: 0; border-bottom: 3px solid transparent; background: none; color: var(--mut); font: 600 15px var(--head); cursor: pointer; }
-  [role=tab][aria-selected=true] { color: var(--text); border-bottom-color: var(--pink); }
+  [role=tablist] { position: relative; display: flex; gap: 4px; margin-bottom: 16px; border-bottom: 1px solid var(--line); }
+  [role=tab] { padding: 10px 16px; border: 0; background: none; color: var(--mut); font: 600 15px var(--head); cursor: pointer; transition: color .2s; }
+  [role=tab]:hover, [role=tab][aria-selected=true] { color: var(--text); }
+  /* la raya rosa se desliza hasta la pestaña elegida */
+  .tabink { position: absolute; left: 0; bottom: -1px; height: 3px; width: 0; border-radius: 3px 3px 0 0; background: var(--pink); transition: transform .35s var(--ease), width .35s var(--ease); }
   [role=tabpanel] { display: grid; gap: 14px; }
+  [role=tabpanel].enter { animation: rise .4s var(--ease) both; }
   [role=tabpanel][hidden] { display: none; }
 
   .card { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 16px; }
   .card.look { background: linear-gradient(160deg, #2a2352, var(--panel) 60%); border-color: #463c78; }
+  .card > * { transition: opacity .3s; }
   .card.off > :not(.head) { opacity: .45; }
   .head { display: flex; align-items: center; gap: 10px; margin-bottom: 4px; }
   .head h3 { margin: 0; font: 700 17px var(--head); }
@@ -53,21 +66,27 @@
   .switch:checked { background: var(--pink); }
   .switch:checked::after { transform: translateX(18px); }
   button { padding: 8px 13px; border-radius: 9px; border: 1px solid var(--line); background: var(--raise); color: var(--text); font: 600 13px system-ui, sans-serif; cursor: pointer; }
+  button { transition: transform .15s var(--ease), border-color .2s, background .2s; }
   button:hover { border-color: var(--mut); }
+  button:active { transform: scale(.96); }
+  button.done { animation: pop .45s var(--ease); border-color: var(--cyan); color: var(--cyan); }
   .hint { margin: 8px 0 0; color: var(--mut); font-size: 12px; }
   code { padding: 1px 6px; border-radius: 6px; background: var(--ink); font-size: 12px; }
   .url { display: flex; gap: 6px; margin-top: 12px; }
   .url input { color: var(--cyan); font: 12px ui-monospace, Consolas, monospace; }
   .now { font: 800 20px var(--head); font-variant-numeric: tabular-nums; }
+  .now.bump { color: var(--cyan); transition: color .6s; }
   .row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
 
   /* escena de vista previa: los widgets a su tamaño real de OBS, reducidos para caber */
   aside { position: sticky; top: 16px; align-self: start; display: grid; gap: 12px; }
   .bar { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
   .bar h2 { margin: 0 auto 0 0; font: 700 17px var(--head); }
-  .seg { display: inline-flex; padding: 3px; border-radius: 10px; background: var(--panel); border: 1px solid var(--line); }
-  .seg button { border: 0; background: none; color: var(--mut); padding: 6px 11px; }
-  .seg button[aria-pressed=true] { background: var(--raise); color: var(--text); }
+  .seg { position: relative; display: inline-flex; padding: 3px; border-radius: 10px; background: var(--panel); border: 1px solid var(--line); }
+  .seg button { position: relative; z-index: 1; border: 0; background: none; color: var(--mut); padding: 6px 11px; transition: color .2s; }
+  .seg button[aria-pressed=true] { color: var(--text); }
+  /* fondo que se desliza bajo la opción elegida */
+  .seg .thumb { position: absolute; top: 3px; bottom: 3px; left: 0; width: 0; border-radius: 8px; background: var(--raise); transition: transform .35s var(--ease), width .35s var(--ease); }
   .scene { position: relative; overflow: hidden; border-radius: 14px; border: 1px solid var(--line);
     background: radial-gradient(circle at 75% 30%, #5e81ac 0, transparent 55%), linear-gradient(135deg, #232838, #3b4252 60%, #4c566a); }
   .scene[data-bg=light] { background: linear-gradient(135deg, #e8ecf3, #c9d3e3); }
@@ -75,7 +94,8 @@
   .scene.h { aspect-ratio: 16 / 9; }
   .scene.z { aspect-ratio: 1460 / 920; }
   .scene.v { height: min(74vh, 820px); }
-  .canvas { position: absolute; transform-origin: 0 0; }
+  .canvas { position: absolute; transform-origin: 0 0; transition: transform .45s var(--ease); }
+  .canvas.swap { animation: fadein .4s ease both; } @keyframes fadein { from { opacity: 0; } }
   .canvas iframe { position: absolute; border: 0; background: transparent; }
   .canvas .area { position: absolute; border: 2px dashed #ffffff30; border-radius: 6px; pointer-events: none; }
   .tests { display: flex; flex-wrap: wrap; gap: 6px; }
@@ -84,7 +104,7 @@
 </head>
 <body>
 <header>
-  <h1>Liv<span>alyst</span></h1>
+  <h1><svg viewBox="0 0 512 512" aria-hidden="true"><defs><linearGradient id="lg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fe2c55"/><stop offset="1" stop-color="#b8114a"/></linearGradient></defs><rect width="512" height="512" rx="116" fill="url(#lg)"/><path d="M120 170 a50 50 0 0 1 50 -50 h172 a50 50 0 0 1 50 50 v112 a50 50 0 0 1 -50 50 h-96 l-74 62 v-62 h-2 a50 50 0 0 1 -50 -50z" fill="#fff"/><rect x="196" y="176" width="40" height="108" rx="20" fill="#fe2c55"/><rect x="196" y="244" width="96" height="40" rx="20" fill="#fe2c55"/><circle cx="392" cy="368" r="40" fill="#15132a"/><circle cx="392" cy="368" r="20" fill="#25f4ee"/></svg><b class="wm">Liv<span>alyst</span></b></h1>
   <span class="sub">Widgets de TikTok</span>
   <a href="/">Volver al chat</a>
   <span id="saved" role="status">Los cambios se guardan solos</span>
@@ -92,7 +112,7 @@
 
 <main>
   <section>
-    <div role="tablist" aria-label="Secciones">
+    <div role="tablist" aria-label="Secciones"><span class="tabink" aria-hidden="true"></span>
       <button role="tab" id="tab-alerts" aria-controls="p-alerts" aria-selected="true">Alertas</button>
       <button role="tab" id="tab-goals" aria-controls="p-goals" aria-selected="false">Metas</button>
       <button role="tab" id="tab-files" aria-controls="p-files" aria-selected="false">Sonidos e imágenes</button>
@@ -230,6 +250,7 @@ function build() {
     mk('div', { className: 'url' }, mk('input', { readOnly: true, value: 'http://localhost:8787/meta?t=top', ariaLabel: 'Dirección para OBS' }), mk('button', { textContent: 'Copiar' })),
     mk('p', { className: 'hint', textContent: 'Quién ha dado más monedas en este directo. Usa el aspecto de las metas. En OBS: fuente de navegador de 600 × 260 (si caben menos filas, la letra se reduce sola). Se pone a cero con las metas.' }));
   document.querySelectorAll('.url button').forEach(b => (b.dataset.copy = ''));
+  document.querySelectorAll('.card, aside > *').forEach((c, i) => c.style.setProperty('--i', Math.min(i, 12)));
   showCustom(); showStats();
   $('mlist').textContent = media.length ? 'Subidos: ' + media.join(', ') : 'Todavía no has subido ninguno.';
 }
@@ -243,9 +264,18 @@ function showCustom() {
     $(box).querySelectorAll('[data-custom]').forEach(l => (l.hidden = W()[key].theme !== 'custom'));
   }
 }
+const shown = {};
 function showStats() {
   if (!cfg) return;
-  for (const k of Object.keys(GOALS)) { const e = $('now-' + k); if (e) e.textContent = ((stats[k] || 0) + W().goals[k].start).toLocaleString('es'); }
+  for (const k of Object.keys(GOALS)) {
+    const e = $('now-' + k), to = (stats[k] || 0) + W().goals[k].start;
+    if (!e) continue;
+    const from = shown[k] ?? to; shown[k] = to;
+    if (from === to || matchMedia('(prefers-reduced-motion: reduce)').matches) { e.textContent = to.toLocaleString('es'); continue; }
+    const t0 = performance.now(); e.classList.add('bump');
+    const step = t => { const p = Math.min(1, (t - t0) / 600), v = Math.round(from + (to - from) * (1 - (1 - p) ** 3)); e.textContent = v.toLocaleString('es'); if (p < 1) requestAnimationFrame(step); else e.classList.remove('bump'); };
+    requestAnimationFrame(step);
+  }
 }
 
 // ---------- escena ----------
@@ -267,10 +297,17 @@ function fitScene() {
   $('canvas').style.transform = `translate(${(sc.clientWidth - c.w * k) / 2}px, ${(sc.clientHeight - c.h * k) / 2}px) scale(${k})`;
 }
 new ResizeObserver(fitScene).observe($('scene'));
+// Mueve un indicador (raya de las pestañas, fondo de los segmentos) hasta el elemento elegido
+function slide(ind, target) {
+  if (!ind || !target || !target.offsetWidth) return;
+  ind.style.width = target.offsetWidth + 'px';
+  ind.style.transform = `translateX(${target.offsetLeft}px)`;
+}
 function setSeg(attr, val) {
   document.querySelectorAll(`[data-${attr}]`).forEach(b => b.setAttribute('aria-pressed', b.dataset[attr] === val));
+  const on = document.querySelector(`[data-${attr}="${val}"]`); slide(on?.parentElement.querySelector('.thumb'), on);
   store(attr, val);
-  if (attr === 'canvas') { $('scene').className = 'scene ' + val; buildScene(); }
+  if (attr === 'canvas') { $('scene').className = 'scene ' + val; buildScene(); $('canvas').classList.remove('swap'); void $('canvas').offsetWidth; $('canvas').classList.add('swap'); }
   else $('scene').dataset.bg = val;
 }
 const preview = () => setTimeout(() => $('aprev')?.contentWindow.preview?.(), 450); // solo aquí, no en OBS
@@ -283,8 +320,9 @@ function save() {
     const back = r?.ok ? await r.json().catch(() => null) : null;
     // un servidor antiguo responde "ok" y tira los campos que no conoce (como el tema): avisar en vez de fingir que se guardó
     const ok = !!back && back.style?.theme === W().style.theme && back.goalStyle?.theme === W().goalStyle.theme;
-    $('saved').textContent = ok ? '✓ Guardado' : r?.ok ? '⚠ Livalyst está abierto en una versión antigua: vuelve a abrir «Iniciar Livalyst»' : '⚠ No se pudo guardar: ¿está abierto Livalyst?';
+    $('saved').textContent = ok ? '✓ Guardado' : r?.ok ? '⚠ Livalyst está abierto en una versión antigua: vuelve a abrir «Livalyst.exe»' : '⚠ No se pudo guardar: ¿está abierto Livalyst?';
     $('saved').classList.toggle('on', ok); $('saved').classList.toggle('bad', !ok);
+    $('saved').classList.remove('pop'); void $('saved').offsetWidth; $('saved').classList.add('pop'); // pequeño «latido» al guardar
   }, 300);
 }
 document.addEventListener('input', e => {
@@ -301,9 +339,14 @@ document.addEventListener('click', e => {
   if (b.dataset.test) fetch('/test-alert?ev=' + b.dataset.test, { method: 'POST' });
   if (b.dataset.canvas) setSeg('canvas', b.dataset.canvas);
   if (b.dataset.bg) setSeg('bg', b.dataset.bg);
-  if ('copy' in b.dataset) { navigator.clipboard.writeText(b.previousElementSibling.value); b.textContent = '✓ Copiado'; setTimeout(() => (b.textContent = 'Copiar'), 1200); }
+  if ('copy' in b.dataset) { navigator.clipboard.writeText(b.previousElementSibling.value); b.textContent = '✓ Copiado'; b.classList.add('done'); setTimeout(() => { b.textContent = 'Copiar'; b.classList.remove('done'); }, 1200); }
   if (b.getAttribute('role') === 'tab') {
-    document.querySelectorAll('[role=tab]').forEach(t => { t.setAttribute('aria-selected', t === b); $(t.getAttribute('aria-controls')).hidden = t !== b; });
+    document.querySelectorAll('[role=tab]').forEach(t => {
+      const panel = $(t.getAttribute('aria-controls')), was = !panel.hidden;
+      t.setAttribute('aria-selected', t === b); panel.hidden = t !== b;
+      if (t === b && !was) { panel.classList.remove('enter'); void panel.offsetWidth; panel.classList.add('enter'); }
+    });
+    slide(document.querySelector('.tabink'), b);
     store('tab', b.id);
   }
 });
@@ -331,10 +374,13 @@ async function start() {
     if (d.cfg && !cfg) { cfg = d.cfg; build(); }   // solo la primera vez: así no se pisa lo que estás escribiendo
     else if (d.cfg) cfg = { ...d.cfg, widgets: cfg.widgets };
   };
-  ws.onclose = () => { $('saved').textContent = '⚠ Sin conexión con Livalyst: ábrelo con «Iniciar Livalyst»'; $('saved').className = 'bad'; setTimeout(start, 3000); };
+  ws.onclose = () => { $('saved').textContent = '⚠ Sin conexión con Livalyst: ábrelo con «Livalyst.exe»'; $('saved').className = 'bad'; setTimeout(start, 3000); };
 }
+for (const seg of document.querySelectorAll('.seg')) seg.prepend(Object.assign(document.createElement('span'), { className: 'thumb' }));
 setSeg('bg', store('bg') || 'dark');
 setSeg('canvas', store('canvas') || 'z');
+document.body.classList.add('opening'); setTimeout(() => document.body.classList.remove('opening'), 1600);
+addEventListener('resize', () => { slide(document.querySelector('.tabink'), document.querySelector('[role=tab][aria-selected=true]')); document.querySelectorAll('.seg [aria-pressed=true]').forEach(b => slide(b.parentElement.querySelector('.thumb'), b)); });
 $(store('tab') || 'tab-alerts')?.click();
 start();
 </script>
