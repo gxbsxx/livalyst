@@ -5,7 +5,7 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "test": "node server.js test"
+    "test": "node server.js test && cd tests && node run.js"
   },
   "dependencies": {
     "tiktok-live-connector": "^2.5.0",

@@ -2,3 +2,5 @@ node_modules/
 datos/
 *.log
 .DS_Store
+tests/*.png
+tests/node_modules/
