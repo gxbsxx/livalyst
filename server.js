@@ -3,7 +3,7 @@
 const http = require('http'), fs = require('fs'), path = require('path');
 const WebSocket = require('ws');
 
-const VERSION = '1.34';
+const VERSION = '1.35';
 // Tus datos (configuración, cuenta de Twitch, metas, sonidos e imágenes) viven fuera de la carpeta de la app,
 // así cada versión nueva es una carpeta que se puede sustituir entera sin perder nada.
 const DATA = process.env.APPDATA ? path.join(process.env.APPDATA, 'Livalyst') : path.join(__dirname, 'datos');
@@ -249,7 +249,7 @@ const server = http.createServer((req, res) => {
   if (url === '/stream' || url === '/stream/categories') return streamRoute(url, req, res);
   if (url === '/open/tiktok' && req.method === 'POST') { // en el navegador normal: dentro de OBS, el inicio de sesión con Google deja una ventana en blanco
     if (process.platform !== 'win32') { res.statusCode = 501; return res.end(); }
-    require('child_process').spawn('explorer.exe', ['https://livecenter.tiktok.com/live_monitor?apply_mode=11'], { detached: true, stdio: 'ignore' }).unref();
+    require('child_process').spawn('rundll32.exe', ['url.dll,FileProtocolHandler', 'https://livecenter.tiktok.com/live_monitor?apply_mode=11'], { detached: true, stdio: 'ignore' }).unref(); // el navegador predeterminado, sea cual sea
     return res.end('ok');
   }
   if (url === '/config') { res.setHeader('content-type', 'application/json'); return res.end(JSON.stringify(cfg)); }
