@@ -56,12 +56,12 @@ jobs:
         run: |
           V="v$(node -p "require('./package.json').version")"
           # título y explicación: los del commit si empieza por «Livalyst 1.N …» (primera línea y resto)
-          git log -1 --format=%s > ../titulo.txt; git log -1 --format=%b > ../notas.txt
+          git log -1 --format=%s > ../titulo.txt; { git log -1 --format=%b | grep -v -e '^Co-Authored-By:' -e '^Claude-Session:' || true; } > ../notas.txt
           printf '\n**Cómo usarlo:** descarga Livalyst.zip, descomprímelo y abre Livalyst.exe. No hace falta instalar nada.\n' >> ../notas.txt
           T=$(cat ../titulo.txt); case "$T" in "Livalyst ${V#v}"*) ;; *) T="Livalyst $V";; esac
           if gh release view "$V" > /dev/null 2>&1; then
-            # ya publicada: solo se pone al día si aún tiene el título genérico
-            [ "$(gh release view "$V" --json name -q .name)" = "Livalyst $V" ] && [ "$T" != "Livalyst $V" ] && gh release edit "$V" --title "$T" --notes-file ../notas.txt
+            # ya publicada: si este commit es el de la versión, pone al día su título y explicación
+            if [ "$T" != "Livalyst $V" ]; then gh release edit "$V" --title "$T" --notes-file ../notas.txt; fi
             echo "$V ya estaba publicada"; exit 0
           fi
           gh release create "$V" dist/Livalyst.zip --target "$GITHUB_SHA" --title "$T" --notes-file ../notas.txt
