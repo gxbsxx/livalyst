@@ -18,6 +18,11 @@ jobs:
         run: |
           curl -sSfL -o build/rcedit.exe https://github.com/electron/rcedit/releases/download/v2.0.0/rcedit-x64.exe
           node build/make-exe.js dist/Livalyst
+      - name: Fabricar el icono de la bandeja
+        shell: pwsh
+        run: |
+          & "$env:WINDIR\Microsoft.NET\Framework64\v4.0.30319\csc.exe" /nologo /target:winexe /win32icon:build/livalyst.ico /out:dist/Livalyst/LivalystBandeja.exe build/bandeja.cs
+          if ($LASTEXITCODE -ne 0) { throw "No se pudo compilar el icono de la bandeja" }
       - name: Montar la carpeta portable
         shell: bash
         run: |
@@ -34,8 +39,10 @@ jobs:
           $r = Invoke-WebRequest http://localhost:8787/config -UseBasicParsing
           if ($r.StatusCode -ne 200) { throw "Livalyst no responde" }
           Get-Content dist/Livalyst/livalyst.log
+          if (-not (Get-Process LivalystBandeja -ErrorAction SilentlyContinue)) { throw "No aparece el icono de la bandeja" }
           Invoke-WebRequest -Method POST http://localhost:8787/quit -UseBasicParsing | Out-Null
-          Start-Sleep 2
+          Start-Sleep 12
+          if (Get-Process LivalystBandeja -ErrorAction SilentlyContinue) { throw "El icono de la bandeja no se quita al cerrar Livalyst" }
           Remove-Item dist/Livalyst/livalyst.log -ErrorAction SilentlyContinue
       - name: Comprimir (carpeta Livalyst dentro del zip)
         shell: pwsh

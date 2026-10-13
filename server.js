@@ -3,7 +3,7 @@
 const http = require('http'), fs = require('fs'), path = require('path');
 const WebSocket = require('ws');
 
-const VERSION = '1.27';
+const VERSION = '1.28';
 // Tus datos (configuración, cuenta de Twitch, metas, sonidos e imágenes) viven fuera de la carpeta de la app,
 // así cada versión nueva es una carpeta que se puede sustituir entera sin perder nada.
 const DATA = process.env.APPDATA ? path.join(process.env.APPDATA, 'Livalyst') : path.join(__dirname, 'datos');
@@ -737,4 +737,11 @@ function bootDiag() {
 server.listen(PORT, () => {
   bootDiag();
   console.log(`Livalyst v${VERSION} en http://localhost:${PORT} (datos en ${DATA})`); restart(); startEventSub();
+  bandeja();
 });
+// Icono junto al reloj de Windows (build/bandeja.cs). Si ya hay uno, el nuevo se cierra solo.
+function bandeja() {
+  const exe = path.join(__dirname, 'LivalystBandeja.exe');
+  if (process.platform !== 'win32' || !fs.existsSync(exe)) return;
+  try { require('child_process').spawn(exe, [], { detached: true, stdio: 'ignore' }).unref(); } catch (e) { console.log('Sin icono en la bandeja:', e.message); }
+}
