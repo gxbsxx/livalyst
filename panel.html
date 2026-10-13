@@ -17,8 +17,9 @@
   button { font: inherit; }
 
   /* cabecera del dock */
-  header { display: flex; gap: 6px; align-items: center; padding: 5px 8px; border-bottom: 1px solid var(--line);
-    font: 12px/1.2 "Segoe UI", system-ui, sans-serif; color: var(--mut); flex-wrap: wrap; }
+  header { display: grid; gap: 6px; padding: 6px 8px 8px; border-bottom: 1px solid var(--line);
+    font: 12px/1.2 "Segoe UI", system-ui, sans-serif; color: var(--mut); }
+  .hrow { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; min-height: 20px; }
   #st { display: flex; gap: 4px; flex-wrap: wrap; }
   .st { display: flex; align-items: center; gap: 4px; background: none; border: 1px solid var(--line); color: var(--mut);
     border-radius: 999px; padding: 2px 8px; cursor: pointer; font-size: 11px; }
@@ -26,10 +27,19 @@
   .st.on i { background: #3ddc84; }
   .st.off { opacity: .35; text-decoration: line-through; }
   #views { font-size: 11px; }
-  .tools { margin-left: auto; display: flex; gap: 2px; }
-  .tools button, .pill { background: none; border: 0; color: var(--mut); cursor: pointer; padding: 2px 6px; border-radius: 4px; font-size: 14px; }
-  .tools button:hover { background: var(--line); color: var(--text); }
-  .pill { font-size: 11px; background: #ffd16622; color: #ffd166; }
+  /* barra de acciones: cuatro botones iguales, con icono y nombre; «Editar directo» destacado */
+  .tools { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; container-type: inline-size; }
+  .tool { display: flex; flex-direction: column; align-items: center; gap: 3px; min-width: 0; padding: 6px 2px 5px; border-radius: 9px;
+    border: 1px solid var(--line); background: #ffffff08; color: var(--mut); font: 600 10.5px/1.1 "Segoe UI", system-ui, sans-serif;
+    cursor: pointer; text-align: center; transition: background .15s, color .15s, border-color .15s, transform .1s; }
+  .tool .ic { font-size: 16px; line-height: 1; }
+  .tool .tx { max-width: 100%; overflow-wrap: anywhere; }
+  .tool:hover { color: var(--text); border-color: #3c3c46; background: #ffffff14; }
+  .tool:active { transform: scale(.95); }
+  .tool:focus-visible { outline: 2px solid var(--acc); outline-offset: 1px; }
+  .tool.pri { color: #fff; border-color: color-mix(in srgb, var(--acc) 60%, transparent); background: color-mix(in srgb, var(--acc) 26%, transparent); }
+  .tool.pri:hover { background: color-mix(in srgb, var(--acc) 40%, transparent); }
+  @container (max-width: 200px) { .tool .tx { display: none; } } /* panel muy estrecho: solo iconos */
 
   /* chat */
   main { flex: 1; min-height: 0; position: relative; display: flex; }
@@ -184,13 +194,13 @@
 </style>
 <body>
 <header id="head">
-  <span id="st"></span><span id="views"></span>
-  <span class="tools">
-    <button id="liveBtn" title="Editar el título y la categoría del directo de Twitch">✏️</button>
-    <button id="testBtn" title="Enviar mensajes de prueba">🧪</button>
-    <button id="clearBtn" title="Vaciar el chat (solo aquí)">🧹</button>
-    <button id="gear" title="Ajustes">⚙</button>
-  </span>
+  <div class="hrow"><span id="st"></span><span id="views"></span></div>
+  <nav class="tools" aria-label="Acciones">
+    <button class="tool pri" id="liveBtn" title="Cambiar el título y la categoría del directo"><span class="ic" aria-hidden="true">✏️</span><span class="tx">Editar directo</span></button>
+    <button class="tool" id="testBtn" title="Enviar mensajes y eventos de prueba al chat"><span class="ic" aria-hidden="true">🧪</span><span class="tx">Probar</span></button>
+    <button class="tool" id="clearBtn" title="Vaciar el chat (solo aquí, no en las plataformas)"><span class="ic" aria-hidden="true">🧹</span><span class="tx">Vaciar chat</span></button>
+    <button class="tool" id="gear" title="Ajustes: cuentas, apariencia, filtros y eventos"><span class="ic" aria-hidden="true">⚙️</span><span class="tx">Ajustes</span></button>
+  </nav>
 </header>
 <div id="alert" hidden><div class="alertbox" role="alertdialog" aria-labelledby="alertTitle"><h2 id="alertTitle"></h2><p id="alertText"></p><p class="meta" id="alertMeta"></p><button id="alertClose">Entendido, cerrar</button></div></div>
 <section id="evbox"><div id="evbar" class="secbar"><button id="evHead" title="Mostrar u ocultar">▾ ⚡ Eventos<span id="evCount"></span></button><span class="sp"></span><button id="evClear" title="Vaciar la lista de eventos">🧹</button></div><div id="evlist"></div></section>
