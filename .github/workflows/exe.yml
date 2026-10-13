@@ -1,10 +1,9 @@
 # Fabrica la versión portable para Windows (carpeta con Livalyst.exe, sin instalar nada) y comprueba que arranca.
-# Con cada etiqueta vX.Y.Z la publica en «Releases» para descargarla.
+# Cuando sube la versión de package.json, la publica sola en «Releases» para descargarla.
 name: Livalyst.exe
 on:
   push:
     branches: [main]
-    tags: ['v*']
 permissions:
   contents: write
 jobs:
@@ -43,8 +42,10 @@ jobs:
         run: Compress-Archive -Path dist/Livalyst -DestinationPath dist/Livalyst.zip
       - uses: actions/upload-artifact@v4
         with: { name: Livalyst-portable, path: dist/Livalyst.zip }
-      - name: Publicar en Releases
-        if: startsWith(github.ref, 'refs/tags/v')
+      - name: Publicar en Releases (solo si la versión es nueva)
         shell: bash
         env: { GH_TOKEN: '${{ github.token }}' }
-        run: gh release create "$GITHUB_REF_NAME" dist/Livalyst.zip --title "Livalyst $GITHUB_REF_NAME" --notes "Descarga Livalyst.zip, descomprímelo y abre Livalyst.exe. No hace falta instalar nada."
+        run: |
+          V="v$(node -p "require('./package.json').version")"
+          if gh release view "$V" > /dev/null 2>&1; then echo "$V ya estaba publicada"; exit 0; fi
+          gh release create "$V" dist/Livalyst.zip --target "$GITHUB_SHA" --title "Livalyst $V" --notes "Descarga Livalyst.zip, descomprímelo y abre Livalyst.exe. No hace falta instalar nada."
