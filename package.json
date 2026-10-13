@@ -1,0 +1,17 @@
+{
+  "name": "livalyst",
+  "version": "1.19.0",
+  "private": true,
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node server.js test"
+  },
+  "dependencies": {
+    "tiktok-live-connector": "^2.5.0",
+    "youtube-chat": "^2.2.0",
+    "ws": "^8.18.0"
+  },
+  "license": "MIT",
+  "description": "Chat unificado, alertas y metas para OBS (Twitch, TikTok, YouTube y Kick)"
+}

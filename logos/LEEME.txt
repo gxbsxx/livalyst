@@ -1,0 +1,7 @@
+Pon aqui los logos con estos nombres (png, svg, webp, jpg o ico):
+  twitch.png   tiktok.png   youtube.png   kick.png
+Si falta alguno, ese chat sigue mostrando la etiqueta de texto (TW, TT...).
+
+Descargalos de las paginas oficiales de marca:
+  Twitch: https://brand.twitch.com
+  TikTok: https://www.tiktok.com/brand

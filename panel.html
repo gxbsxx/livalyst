@@ -1,0 +1,584 @@
+<!doctype html>
+<html lang="es">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Livalyst</title>
+<style>
+  :root {
+    --font: "Segoe UI", system-ui, sans-serif; --size: 14px; --weight: 400; --lh: 1.45; --gap: 2px; --emote: 1.8em;
+    --text: #efeff1; --bga: 1; --mut: #8a8a93; --line: #26262c; --panel: #18181b; --acc: #9146ff;
+  }
+  * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+  html { background: rgb(14 14 16 / var(--bga)); }
+  body { margin: 0; height: 100vh; display: flex; flex-direction: column; background: transparent; color: var(--text);
+    font-family: var(--font); font-size: var(--size); font-weight: var(--weight); line-height: var(--lh); overflow: hidden; }
+  button { font: inherit; }
+
+  /* cabecera del dock */
+  header { display: flex; gap: 6px; align-items: center; padding: 5px 8px; border-bottom: 1px solid var(--line);
+    font: 12px/1.2 "Segoe UI", system-ui, sans-serif; color: var(--mut); flex-wrap: wrap; }
+  #st { display: flex; gap: 4px; flex-wrap: wrap; }
+  .st { display: flex; align-items: center; gap: 4px; background: none; border: 1px solid var(--line); color: var(--mut);
+    border-radius: 999px; padding: 2px 8px; cursor: pointer; font-size: 11px; }
+  .st i { width: 7px; height: 7px; border-radius: 50%; background: #555; }
+  .st.on i { background: #3ddc84; }
+  .st.off { opacity: .35; text-decoration: line-through; }
+  #views { font-size: 11px; }
+  .tools { margin-left: auto; display: flex; gap: 2px; }
+  .tools button, .pill { background: none; border: 0; color: var(--mut); cursor: pointer; padding: 2px 6px; border-radius: 4px; font-size: 14px; }
+  .tools button:hover { background: var(--line); color: var(--text); }
+  .pill { font-size: 11px; background: #ffd16622; color: #ffd166; }
+
+  /* chat */
+  main { flex: 1; min-height: 0; position: relative; display: flex; }
+  #chat { flex: 1; overflow-y: auto; padding: 6px 8px; display: flex; flex-direction: column; scrollbar-width: thin; }
+  #chat > :first-child { margin-top: auto; } /* los mensajes nacen abajo y suben */
+  .top #chat > :first-child { margin-top: 0; }
+  .m { padding: var(--gap) 4px; overflow-wrap: anywhere; border-radius: 6px; }
+  .m:hover { background: #ffffff0a; }
+  .m img { height: var(--emote); vertical-align: middle; margin: -.3em 1px; }
+  .m img.logo { height: 1.1em; margin: 0 5px 0 0; }
+  .p { display: inline-block; font-size: .7em; font-weight: 700; padding: 0 4px; border-radius: 3px; margin-right: 5px; vertical-align: .1em; }
+  .twitch { --pc: #9146ff; } .youtube { --pc: #ff0033; } .tiktok { --pc: #25f4ee; } .kick { --pc: #53fc18; }
+  .p.twitch, .p.youtube { background: var(--pc); color: #fff; } .p.tiktok, .p.kick { background: var(--pc); color: #000; }
+  .u { font-weight: 700; }
+  .t { color: var(--mut); font-size: .75em; margin-right: 5px; font-weight: 400; }
+  .r { margin-right: 3px; font-size: .85em; }
+  .x { font-weight: 700; color: #ffd166; margin-left: 4px; }
+  .hl { background: #ffd1661f; box-shadow: inset 3px 0 #ffd166; }
+  .first { box-shadow: inset 3px 0 #b9a3ff; }
+  .first::after { content: " ✨ primer mensaje"; color: #b9a3ff; font-size: .7em; }
+  /* eventos reales: tarjeta con etiqueta de color que un mensaje de chat no puede imitar */
+  /* dentro del chat, un evento es un aviso centrado tipo píldora: no se confunde con un mensaje */
+  .m.ev { background: color-mix(in srgb, var(--ec) 14%, transparent); border: 1px dashed color-mix(in srgb, var(--ec) 65%, transparent);
+    border-radius: 8px; padding: 2px 8px; margin: 3px 0; font-size: .9em; } /* compacto: ocupa lo mismo que un mensaje */
+  .ev .u::before, .evi .u::before { content: attr(data-ico) " "; }
+  .tag { display: inline-block; font: 700 10px/1.6 "Segoe UI", system-ui, sans-serif; letter-spacing: .04em; padding: 0 6px; border-radius: 4px;
+    margin-right: 6px; vertical-align: .15em; background: var(--ec, var(--pc)); color: #000; text-shadow: none; }
+  .big { border-color: #ffd166 !important; box-shadow: 0 0 0 1px #ffd166, 0 0 14px #ffd16655; }
+  .big .tag { background: #ffd166; color: #000; }
+  .amt { font-weight: 800; color: #ffd166; margin-left: 6px; white-space: nowrap; }
+
+  /* caja de eventos: un bloque propio, separado del chat */
+  #evbox { margin: 6px 6px 2px; border-radius: 12px; background: rgb(28 24 50 / max(.85, var(--bga))); border: 1px solid #3a3266;
+    box-shadow: 0 4px 14px #0006; overflow: hidden; }
+  .secbar { display: flex; align-items: center; gap: 6px; padding: 5px 10px; font: 600 12px/1.2 "Segoe UI", system-ui, sans-serif; color: #d9d2ff; }
+  #evbar { background: linear-gradient(90deg, #3a2f72, #2a2450); border-bottom: 1px solid #3a3266; }
+  .secbar button { background: none; border: 0; color: inherit; cursor: pointer; padding: 2px 4px; border-radius: 4px; font: inherit; }
+  .secbar button:hover { background: #ffffff18; }
+  #evCount { background: #ffc93c; color: #000; border-radius: 999px; padding: 0 6px; font-size: 10px; margin-left: 4px; font-weight: 700; }
+  #evCount:empty { display: none; }
+  .secbar .sp { margin-left: auto; }
+  #chatbar { margin: 4px 6px 0; color: var(--mut); border-bottom: 1px solid var(--line); }
+  #evlist { height: 140px; min-height: 40px; max-height: 70vh; overflow-y: auto; resize: vertical; padding: 4px 6px 6px; scrollbar-width: thin; }
+  #evbox.closed #evlist { display: none; }
+  .evi { display: grid; grid-template-columns: auto 1fr auto; gap: 8px; align-items: center; padding: 6px 8px; margin: 4px 0; border-radius: 10px;
+    background: color-mix(in srgb, var(--ec) 13%, #17142c); border-left: 3px solid var(--ec); font-size: .92em; }
+  .evi .ico { width: 2em; height: 2em; display: grid; place-items: center; border-radius: 50%; font-size: 1em;
+    background: color-mix(in srgb, var(--ec) 28%, transparent); box-shadow: 0 0 0 1px color-mix(in srgb, var(--ec) 55%, transparent); }
+  .evi .body { min-width: 0; }
+  .evi .l1 { display: flex; align-items: center; gap: 4px; min-width: 0; }
+  .evi .l1 .u { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #fff; }
+  .evi .l2 { color: #c9c3e6; font-size: .9em; overflow-wrap: anywhere; }
+  .evi .t { align-self: start; margin: 0; }
+  .evi .amt { margin-left: auto; padding-left: 6px; }
+  .evi img { height: 1.4em; vertical-align: middle; margin: -.2em 1px; }
+  .evi img.logo { height: 1em; margin: 0; }
+  .evi.big { background: color-mix(in srgb, #ffc93c 18%, #17142c); }
+  .evi.new { animation: flash 1.2s ease-out; }
+  @keyframes flash { from { background: color-mix(in srgb, var(--ec) 55%, transparent); } }
+  /* sala: quién está viendo el directo */
+  #roombox { margin: 4px 6px 2px; border-radius: 12px; background: rgb(14 32 34 / max(.85, var(--bga))); border: 1px solid #1f4d4f; overflow: hidden; }
+  #roombar { background: linear-gradient(90deg, #15494b, #12302f); border-bottom: 1px solid #1f4d4f; color: #c8f7f5; }
+  #roomCount { background: #25f4ee; color: #000; border-radius: 999px; padding: 0 6px; font-size: 10px; margin-left: 4px; font-weight: 700; }
+  #roomCount:empty { display: none; }
+  #roomlist { height: 150px; min-height: 40px; max-height: 60vh; overflow-y: auto; resize: vertical; padding: 4px 6px 6px; scrollbar-width: thin; }
+  #roombox.closed #roomlist { display: none; }
+  #roomlist { display: grid; grid-template-columns: repeat(auto-fill, minmax(4.6em, 1fr)); gap: 4px; align-content: start; }
+  .who { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 5px 2px 4px; border-radius: 8px; min-width: 0;
+    background: #ffffff08; transition: opacity .4s, transform .4s; }
+  .who:hover { background: #ffffff12; }
+  .who.in { animation: whoin .5s ease-out; }
+  .who.out { opacity: 0; transform: scale(.6); }
+  @keyframes whoin { from { opacity: 0; transform: scale(.6); background: #25f4ee44; } }
+  .av { position: relative; flex: none; width: 1.9em; height: 1.9em; }
+  .av img, .av .ini { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; box-shadow: 0 0 0 1.5px var(--pc); }
+  .av .ini { display: grid; place-items: center; font-weight: 700; color: #000; font-size: .7em; }
+  .av .p, .av img.logo { position: absolute; right: -3px; bottom: -2px; width: auto; height: .7em; margin: 0; border-radius: 2px; box-shadow: none; font-size: .4em; line-height: 1.75em; padding: 0 2px; }
+  .who .u { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: .72em; }
+  #roomempty { grid-column: 1 / -1; color: var(--mut); font-size: 11px; text-align: center; padding: 10px 0; }
+
+  /* aviso de moderación de TikTok: tapa el chat hasta que lo cierres */
+  #alert { position: fixed; inset: 0; z-index: 50; display: grid; place-items: center; padding: 12px; background: rgb(0 0 0 / .7);
+    font: 15px/1.45 "Segoe UI", system-ui, sans-serif; }
+  .alertbox { width: min(100%, 520px); background: #2b0b12; color: #fff; border: 3px solid #ff3b5c; border-radius: 14px; padding: 18px;
+    box-shadow: 0 0 30px #ff3b5c88; animation: alertin .35s cubic-bezier(.2, 1.4, .4, 1), glow 1.6s ease-in-out infinite alternate; }
+  .alertbox h2 { margin: 0 0 10px; font-size: 1.35em; line-height: 1.25; }
+  .alertbox p { margin: 0 0 8px; white-space: pre-wrap; overflow-wrap: anywhere; }
+  .alertbox .meta { color: #ffb3c0; font-size: .85em; }
+  .alertbox button { margin-top: 10px; width: 100%; padding: 10px; border: 0; border-radius: 8px; background: #ff3b5c; color: #fff; font: 700 15px "Segoe UI", system-ui, sans-serif; cursor: pointer; }
+  @keyframes alertin { from { opacity: 0; transform: scale(.85); } }
+  @keyframes glow { to { box-shadow: 0 0 50px #ff3b5ccc; } }
+  #evempty { color: var(--mut); font-size: 11px; text-align: center; padding: 10px 0; }
+  .bubble .m { background: rgb(0 0 0 / .55); border-radius: 12px; padding: calc(var(--gap) + 3px) 10px; margin: 3px 0; width: fit-content; max-width: 100%; }
+  .bubble .m.ev { background: color-mix(in srgb, var(--ec) 30%, rgb(0 0 0 / .6)); }
+  .shadow #chat, .shadow #join { text-shadow: 0 1px 3px #000, 0 0 6px #000c; }
+  .outline #chat, .outline #join { text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000, 0 0 4px #000; }
+  .anim .m.new { animation: msgin .3s ease-out; }
+  @keyframes msgin { from { opacity: 0; transform: translateX(-16px); } }
+  #empty { color: var(--mut); text-align: center; font-size: 12px; margin: auto; }
+  #more { position: absolute; left: 50%; bottom: 8px; transform: translateX(-50%); background: var(--acc); color: #fff; border: 0;
+    border-radius: 999px; padding: 4px 12px; font-size: 12px; cursor: pointer; box-shadow: 0 2px 8px #0008; display: none; }
+  .top #more { bottom: auto; top: 8px; }
+
+  /* aviso de «Livalyst se ha iniciado» (unos segundos arriba del todo) */
+  #boot { position: fixed; top: 6px; left: 50%; transform: translateX(-50%); z-index: 40; max-width: calc(100% - 16px); padding: 6px 14px; border-radius: 999px;
+    background: #1f3b2c; border: 1px solid #3ddc84; color: #d8ffe8; font: 600 12px/1.3 "Segoe UI", system-ui, sans-serif; box-shadow: 0 4px 14px #0008;
+    animation: boot 6s ease forwards; pointer-events: none; }
+  @keyframes boot { 0% { opacity: 0; transform: translate(-50%, -10px); } 8%, 85% { opacity: 1; transform: translate(-50%, 0); } 100% { opacity: 0; } }
+
+  /* entradas de TikTok y mensaje destacado */
+  #join { position: fixed; left: 8px; bottom: 6px; z-index: 5; pointer-events: none; } /* flota sobre el chat: no le quita sitio */
+  #join span { display: inline-block; padding: 2px 10px; border-radius: 999px; background: #18181bee; box-shadow: 0 2px 8px #0008; font-size: .85em; animation: join 3s ease forwards; }
+  #join b { color: #25f4ee; font-weight: 600; }
+  @keyframes join { 0% { opacity: 0; transform: translateX(-30px); } 12%, 80% { opacity: 1; transform: none; } 100% { opacity: 0; } }
+
+  /* ajustes */
+  dialog { background: var(--panel); color: #efeff1; border: 1px solid var(--line); border-radius: 10px; width: min(96vw, 420px);
+    max-height: 92vh; padding: 0; font: 13px/1.4 "Segoe UI", system-ui, sans-serif; }
+  dialog::backdrop { background: #000a; }
+  dialog form { padding: 12px 14px; }
+  dialog h2 { font-size: 15px; margin: 0 0 8px; }
+  details { border: 1px solid var(--line); border-radius: 8px; margin: 6px 0; }
+  summary { padding: 8px 10px; cursor: pointer; font-weight: 600; }
+  details > div { padding: 0 10px 10px; display: grid; grid-template-columns: 1fr 1fr; gap: 6px 10px; }
+  label { display: flex; flex-direction: column; gap: 2px; font-size: 12px; color: var(--mut); }
+  label.ck { flex-direction: row; align-items: center; gap: 6px; color: #efeff1; }
+  .wide { grid-column: 1 / -1; }
+  input[type=text], input[type=number], select { width: 100%; padding: 5px 6px; background: #0e0e10; border: 1px solid var(--line); color: #efeff1; border-radius: 4px; font: inherit; }
+  input[type=color] { width: 100%; height: 28px; background: none; border: 1px solid var(--line); border-radius: 4px; }
+  input[type=range] { width: 100%; }
+  .hint { grid-column: 1 / -1; font-size: 11px; color: var(--mut); margin: 0; }
+  .btn { padding: 6px 12px; border-radius: 5px; border: 0; cursor: pointer; background: var(--line); color: #efeff1; }
+  .btn.pri { background: var(--acc); color: #fff; }
+  menu { display: flex; justify-content: flex-end; gap: 6px; padding: 0; margin: 10px 0 0; }
+</style>
+<body>
+<header id="head">
+  <span id="st"></span><span id="views"></span>
+  <span class="tools">
+    <button id="testBtn" title="Enviar mensajes de prueba">🧪</button>
+    <button id="clearBtn" title="Vaciar el chat (solo aquí)">🧹</button>
+    <button id="gear" title="Ajustes">⚙</button>
+  </span>
+</header>
+<div id="alert" hidden><div class="alertbox" role="alertdialog" aria-labelledby="alertTitle"><h2 id="alertTitle"></h2><p id="alertText"></p><p class="meta" id="alertMeta"></p><button id="alertClose">Entendido, cerrar</button></div></div>
+<section id="evbox"><div id="evbar" class="secbar"><button id="evHead" title="Mostrar u ocultar">▾ ⚡ Eventos<span id="evCount"></span></button><span class="sp"></span><button id="evClear" title="Vaciar la lista de eventos">🧹</button></div><div id="evlist"></div></section>
+<section id="roombox"><div id="roombar" class="secbar"><button id="roomHead" title="Mostrar u ocultar">▾ 👥 En la sala<span id="roomCount"></span></button><span class="sp"></span><button id="roomClear" title="Vaciar la sala (quien siga dentro volverá a salir en cuanto escriba, regale, dé likes o entre de nuevo)">🧹</button></div><div id="roomlist"></div></section>
+<div id="chatbar" class="secbar">💬 Chat</div>
+<main><div id="chat"><div id="empty">Esperando mensajes…<br>Pulsa 🧪 para ver cómo queda.</div></div><button id="more"></button></main>
+<div id="join"></div>
+
+<dialog id="dlg">
+  <form method="dialog" id="form">
+    <h2>Ajustes</h2>
+    <details open><summary>Cuentas</summary><div>
+      <label>Twitch<input type="text" name="twitch" placeholder="tu_canal"></label>
+      <label>TikTok<input type="text" name="tiktok" placeholder="tu_usuario"></label>
+      <label>YouTube<input type="text" name="youtube" placeholder="@tucanal"></label>
+      <label>Kick<input type="text" name="kick" placeholder="tu_canal"></label>
+      <label class="ck"><input type="checkbox" name="ffz"> FrankerFaceZ</label>
+      <label class="ck"><input type="checkbox" name="bttv"> BTTV</label>
+      <label class="ck"><input type="checkbox" name="seventv"> 7TV</label>
+      <button type="button" class="btn pri wide" id="saveAcc">Guardar cuentas y reconectar</button>
+    </div></details>
+    <details id="twAcc"><summary>Cuenta de Twitch (follows, canjes, hype train…)</summary><div>
+      <p class="hint">Para leer el chat no hace falta, pero Twitch solo da los follows, canjes de puntos, hype trains, shoutouts y power-ups al dueño del canal.</p>
+      <p class="wide" id="twState">Estado: …</p>
+      <label class="wide">Client ID de tu aplicación de Twitch<input type="text" data-k="twitchClientId" placeholder="pega aquí el Client ID" autocomplete="off"></label>
+      <button type="button" class="btn pri" id="twLogin">Conectar cuenta</button>
+      <button type="button" class="btn" id="twLogout">Desconectar</button>
+      <p class="hint">Si el botón no abre nada, abre en tu navegador <b>http://localhost:8787/auth/twitch/start</b></p>
+      <details class="wide"><summary>Cómo conseguir el Client ID (una sola vez)</summary><ol class="hint" style="padding-left:18px">
+        <li>Entra en <b>dev.twitch.tv/console/apps</b> con tu cuenta (necesitas tener activada la verificación en dos pasos).</li>
+        <li>Pulsa «Registrar tu aplicación». Nombre: el que quieras (p. ej. Livalyst-tuNombre).</li>
+        <li>URL de redireccionamiento OAuth: <b>http://localhost:8787/auth/twitch</b></li>
+        <li>Categoría: «Chat Bot». Tipo de cliente: «Público».</li>
+        <li>Crea la aplicación, pulsa «Administrar» y copia el <b>ID de cliente</b> aquí arriba.</li>
+      </ol></details>
+    </div></details>
+    <details><summary>Apariencia</summary><div data-look="dock"></div></details>
+    <details><summary>Filtros y resaltados</summary><div>
+      <label class="ck"><input type="checkbox" data-k="filters.hideCommands"> Ocultar comandos (!…)</label>
+      <label class="ck"><input type="checkbox" data-k="filters.hideBots"> Ocultar bots</label>
+      <label class="wide">Bots (separados por comas)<input type="text" data-k="filters.bots"></label>
+      <label class="wide">Ocultar mensajes con estas palabras<input type="text" data-k="filters.blocked" placeholder="spam, enlace…"></label>
+      <label class="wide">Resaltar mensajes con estas palabras<input type="text" data-k="filters.highlight" placeholder="tu nombre ya se resalta solo"></label>
+    </div></details>
+    <details><summary>Eventos</summary><div>
+      <label class="ck"><input type="checkbox" data-k="events.gifts"> Regalos, bits y Super Chats</label>
+      <label class="ck"><input type="checkbox" data-k="events.subs"> Subs, subs regaladas y raids</label>
+      <label class="ck"><input type="checkbox" data-k="events.follows"> Nuevos seguidores</label>
+      <label class="ck"><input type="checkbox" data-k="events.shares"> Compartidos (TikTok)</label>
+      <label class="ck"><input type="checkbox" data-k="events.redeems"> Canjes de puntos (Twitch)</label>
+      <label class="ck wide"><input type="checkbox" data-k="events.mod"> Avisos de moderación de TikTok (ventana grande, p. ej. restricción +18)</label>
+      <label class="ck"><input type="checkbox" data-k="events.join"> Entradas a TikTok</label>
+      <label class="ck wide"><input type="checkbox" data-k="events.room"> Mostrar quién está en la sala</label>
+      <label class="ck wide"><input type="checkbox" data-k="events.box"> Mostrar la caja de eventos arriba del chat</label>
+      <label class="ck wide"><input type="checkbox" data-k="events.inChat"> Mostrar también los eventos dentro del chat</label>
+      <p class="hint">Los eventos los manda la propia plataforma, así que nadie puede fingir un regalo escribiendo en el chat: lo de dentro de una tarjeta con etiqueta de color es real.</p>
+    </div></details>
+    <p class="hint">La apariencia, los filtros y los eventos se guardan solos.</p>
+    <menu><button class="btn" value="close">Cerrar</button></menu>
+  </form>
+</dialog>
+
+<script>
+const LABEL = { twitch: 'TW', youtube: 'YT', tiktok: 'TT', kick: 'KICK' };
+const ROLE = { broadcaster: '📺', moderator: '🛡️', vip: '💎', subscriber: '⭐' };
+// tipo → [icono, etiqueta, ajuste que lo activa]
+const EV = { gift: ['🎁', 'REGALO', 'gifts'], bits: ['💎', 'BITS', 'gifts'], superchat: ['💰', 'SUPER CHAT', 'gifts'],
+  follow: ['➕', 'SEGUIDOR', 'follows'], share: ['🔁', 'COMPARTIDO', 'shares'], sub: ['⭐', 'SUB', 'subs'],
+  subgift: ['🎁', 'SUBS REGALADAS', 'subs'], raid: ['🚀', 'RAID', 'subs'], hype: ['🚂', 'HYPE TRAIN', 'subs'],
+  shoutout: ['📣', 'SHOUTOUT', 'follows'], redeem: ['🎯', 'CANJE', 'redeems'], powerup: ['⚡', 'POWER-UP', 'gifts'],
+  mod: ['⚠️', 'AVISO TIKTOK', 'mod'] };
+// color de cada tipo de evento (no de la plataforma): así se distinguen de un vistazo
+const EVC = { gift: '#ffc93c', bits: '#b98cff', superchat: '#ffc93c', follow: '#3ddc84', share: '#25f4ee', sub: '#b98cff', subgift: '#b98cff',
+  raid: '#ff8a3d', hype: '#ff8a3d', shoutout: '#5ab0ff', redeem: '#5ab0ff', powerup: '#b98cff', mod: '#ff3b5c' };
+// [valor, nombre, pesos disponibles en Google Fonts ('' = solo uno)]
+const FONTS = [['system', 'Sistema (Segoe UI)'], ['Inter', 'Inter', '400;500;700;900'], ['Roboto', 'Roboto', '400;500;700;900'],
+  ['Poppins', 'Poppins', '400;500;700;900'], ['Montserrat', 'Montserrat', '400;500;700;900'], ['Nunito', 'Nunito', '400;500;700;900'],
+  ['Rubik', 'Rubik', '400;500;700;900'], ['Lexend', 'Lexend', '400;500;700;900'], ['Atkinson Hyperlegible', 'Atkinson Hyperlegible (muy legible)', '400;700'],
+  ['Fredoka', 'Fredoka (redondeada)', '400;500;700'], ['Baloo 2', 'Baloo 2', '400;500;700'], ['Comic Neue', 'Comic Neue', '400;700'],
+  ['Bangers', 'Bangers (cómic)', ''], ['Press Start 2P', 'Press Start 2P (pixel)', ''], ['VT323', 'VT323 (retro)', ''], ['custom', 'Una instalada en mi PC…']];
+const LOOK_FIELDS = [
+  ['font', 'Fuente', 'select', FONTS.map(f => [f[0], f[1]])],
+  ['customFont', 'Nombre de la fuente instalada', 'text'],
+  ['size', 'Tamaño de letra', 'range', 10, 48],
+  ['weight', 'Grosor', 'select', [['400', 'Normal'], ['500', 'Medio'], ['700', 'Negrita'], ['900', 'Extra negrita']]],
+  ['spacing', 'Espaciado', 'select', [['0', 'Compacto'], ['1', 'Normal'], ['2', 'Amplio']]],
+  ['emote', 'Tamaño de emotes', 'select', [['1.3', 'Pequeño'], ['1.8', 'Normal'], ['2.5', 'Grande'], ['3.5', 'Enorme']]],
+  ['nameColor', 'Color de los nombres', 'select', [['user', 'El de cada usuario'], ['platform', 'El de la plataforma'], ['white', 'Blanco']]],
+  ['textColor', 'Color del texto', 'color'],
+  ['outline', 'Borde del texto', 'select', [['none', 'Ninguno'], ['shadow', 'Sombra'], ['outline', 'Contorno negro']]],
+  ['bg', 'Opacidad del fondo', 'range', 0, 100],
+  ['max', 'Máximo de mensajes', 'number'],
+  ['bubble', 'Mensajes en burbujas', 'check'], ['badges', 'Logo de plataforma', 'check'],
+  ['roles', 'Iconos mod/sub/vip', 'check'], ['time', 'Hora del mensaje', 'check'],
+  ['anim', 'Animación al entrar', 'check'], ['newestTop', 'Nuevos arriba', 'check'],
+];
+
+const $ = id => document.getElementById(id);
+const chat = $('chat'), join = $('join'), more = $('more'), st = $('st'), dlg = $('dlg'), form = $('form');
+
+let cfg = null, emotes = {}, all = [], evs = [], status = {}, unseen = 0, ws;
+const store = { get(k, d) { try { return JSON.parse(localStorage.getItem(k)) ?? d; } catch { return d; } }, set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} } };
+let evCleared = store.get('evCleared', 0), chatCleared = store.get('chatCleared', 0); // los eventos anteriores a «vaciar» no se vuelven a mostrar
+const hidden = new Set(store.get('hiddenPlatforms', [])); // filtro rápido del dock (clic en las pastillas de arriba)
+
+const logo = {}; // logos/<plataforma>.png|svg si existen; si no, etiqueta de texto
+// se espera a saber qué logos hay ANTES de pintar el historial; si no, al recargar salían las siglas
+const logosReady = Promise.all(Object.keys(LABEL).map(p => new Promise(ok => { const i = new Image(); i.onload = () => { logo[p] = i.src; ok(); }; i.onerror = ok; i.src = '/logos/' + p; })));
+
+const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
+const img = (src, alt, cls) => { const i = el('img', cls); i.src = src; i.alt = i.title = alt || ''; i.loading = 'lazy'; return i; };
+const hue = s => `hsl(${[...s].reduce((h, c) => h * 31 + c.charCodeAt(0) | 0, 0) % 360},70%,65%)`;
+const list = s => (s || '').toLowerCase().split(',').map(x => x.trim()).filter(Boolean);
+const textOf = m => m.parts.map(p => p.t || '').join('');
+const look = () => cfg.look.dock;
+
+// ---------- apariencia ----------
+const loadedFonts = new Set();
+function fontFamily(l) {
+  if (l.font === 'custom') return `"${(l.customFont || '').replace(/["\\;{}<>]/g, '')}", "Segoe UI", system-ui, sans-serif`;
+  const f = FONTS.find(x => x[0] === l.font);
+  if (!f || f[0] === 'system') return '"Segoe UI", system-ui, sans-serif';
+  if (!loadedFonts.has(f[0])) {
+    loadedFonts.add(f[0]);
+    const link = el('link'); link.rel = 'stylesheet';
+    link.href = `https://fonts.googleapis.com/css2?family=${f[0].replace(/ /g, '+')}${f[2] ? ':wght@' + f[2] : ''}&display=swap`;
+    document.head.append(link);
+  }
+  return `"${f[0]}", "Segoe UI", system-ui, sans-serif`;
+}
+function applyLook() {
+  const l = look(), r = document.documentElement.style, b = document.body.classList;
+  r.setProperty('--font', fontFamily(l));
+  r.setProperty('--size', l.size + 'px');
+  r.setProperty('--weight', l.weight);
+  r.setProperty('--lh', ['1.25', '1.45', '1.7'][l.spacing] || '1.45');
+  r.setProperty('--gap', ['0px', '2px', '6px'][l.spacing] || '2px');
+  r.setProperty('--emote', l.emote + 'em');
+  r.setProperty('--text', l.textColor);
+  r.setProperty('--bga', l.bg / 100);
+  b.toggle('bubble', l.bubble); b.toggle('anim', l.anim); b.toggle('top', l.newestTop);
+  b.remove('shadow', 'outline'); if (l.outline !== 'none') b.add(l.outline);
+}
+
+// ---------- filtros ----------
+const visibleEv = m => !!EV[m.ev] && cfg.events[EV[m.ev][2]] && !hidden.has(m.p);
+function visible(m) {
+  if (m.ev) return visibleEv(m); // los eventos no pasan por los filtros de texto del chat
+  if (hidden.has(m.p)) return false;
+  const f = cfg.filters, t = textOf(m).toLowerCase();
+  if (!m.ev && f.hideCommands && t.trimStart().startsWith('!')) return false;
+  if (f.hideBots && list(f.bots).some(b => b === m.login || b === m.user.toLowerCase())) return false;
+  return !list(f.blocked).some(w => t.includes(w));
+}
+function highlighted(m) {
+  const t = textOf(m).toLowerCase();
+  const mine = [cfg.twitch, cfg.tiktok, cfg.kick, cfg.youtube.replace(/^@/, '')].map(x => x.trim().toLowerCase()).filter(Boolean);
+  return mine.some(n => t.includes('@' + n)) || list(cfg.filters.highlight).some(w => t.includes(w));
+}
+
+// ---------- pintar mensajes ----------
+function render(m) {
+  const l = look(), d = el('div', 'm ' + m.p);
+  d.dataset.id = m.id;
+  if (m.ev) { d.classList.add('ev'); d.style.setProperty('--ec', EVC[m.ev] || '#9146ff'); }
+  if (m.big) d.classList.add('big');
+  if (!m.ev && highlighted(m)) d.classList.add('hl');
+  else if (!m.ev && m.first) d.classList.add('first');
+  if (l.time) d.append(el('span', 't', new Date(m.ts).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })));
+  if (l.badges) d.append(logo[m.p] ? img(logo[m.p], LABEL[m.p], 'logo') : el('span', 'p ' + m.p, LABEL[m.p]));
+  if (m.ev) d.append(el('span', 'tag', EV[m.ev]?.[1] || 'EVENTO'));
+  if (l.roles) for (const r of m.roles || []) d.append(el('span', 'r', ROLE[r] || ''));
+  const u = el('span', 'u', m.user);
+  u.style.color = l.nameColor === 'white' ? '#fff' : l.nameColor === 'platform' ? 'var(--pc)' : m.color || hue(m.user);
+  if (m.ev) u.dataset.ico = EV[m.ev]?.[0] || '';
+  d.append(u, m.ev ? ' ' : ': ');
+  for (const part of m.parts) {
+    if (part.img) { d.append(img(part.img, part.alt, 'e')); continue; }
+    for (const w of part.t.split(/(\s+)/)) d.append(Object.hasOwn(emotes, w) ? img(emotes[w], w, 'e') : w); // texto como nodo: sin HTML inyectable
+  }
+  if (m.amount) d.append(el('span', 'amt', m.amount));
+  return d;
+}
+
+// ---------- caja de eventos ----------
+const evbox = $('evbox'), evlist = $('evlist'), evCount = $('evCount');
+function renderEvent(m, fresh) {
+  const d = el('div', 'evi ' + m.p + (m.big ? ' big' : '') + (fresh ? ' new' : ''));
+  d.style.setProperty('--ec', EVC[m.ev] || '#9146ff');
+  const l1 = el('div', 'l1'), l2 = el('div', 'l2'), body = el('div', 'body');
+  l1.append(logo[m.p] ? img(logo[m.p], LABEL[m.p], 'logo') : el('span', 'p ' + m.p, LABEL[m.p]), el('span', 'u', m.user));
+  if (m.amount) l1.append(el('span', 'amt', m.amount));
+  for (const part of m.parts) l2.append(part.img ? img(part.img, part.alt) : part.t);
+  body.append(l1, l2);
+  d.append(el('span', 'ico', EV[m.ev][0]), body, el('span', 't', new Date(m.ts).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })));
+  d.title = EV[m.ev][1];
+  return d;
+}
+const shownEvents = () => evs.filter(m => m.ts > evCleared && visibleEv(m));
+function renderEvents() {
+  evbox.hidden = !cfg.events.box;
+  $('chatbar').hidden = !cfg.events.box; // la cabecera del chat solo hace falta para separarlo de los eventos
+  const list = shownEvents().reverse(); // lo más reciente arriba
+  evlist.replaceChildren(...(list.length ? list.map(m => renderEvent(m)) : [el('div', '', 'Aquí aparecerán los regalos, subs y follows reales.')]));
+  if (!list.length) evlist.firstChild.id = 'evempty';
+  evCount.textContent = list.length || '';
+}
+function addEvent(m) {
+  evs.push(m); if (evs.length > 200) evs.shift();
+  if (!visibleEv(m)) return;
+  $('evempty')?.remove();
+  evlist.prepend(renderEvent(m, true));
+  evCount.textContent = shownEvents().length;
+  if (cfg.events.inChat) add(m, true);
+}
+// ---------- sala ----------
+// El servidor manda la lista completa; aquí se actualiza fila a fila para que las fotos no parpadeen.
+const roombox = $('roombox'), roomlist = $('roomlist'), rows = new Map();
+let room = [];
+function whoRow(r) {
+  const d = el('div', 'who in ' + r.p), av = el('span', 'av');
+  av.append(r.avatar ? img(r.avatar, '') : Object.assign(el('span', 'ini', ([...r.user][0] || '?').toUpperCase()), { style: `background:${hue(r.user)}` }),
+    logo[r.p] ? img(logo[r.p], LABEL[r.p], 'logo') : el('span', 'p ' + r.p, LABEL[r.p]));
+  d.append(av, el('span', 'u', r.user));
+  d.title = r.user + ' · entró a las ' + new Date(r.since).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+  return d;
+}
+function renderRoom() {
+  roombox.hidden = !cfg?.events.room;
+  const list = room.filter(r => !hidden.has(r.p)), keep = new Set(list.map(r => r.k));
+  for (const [k, d] of rows) if (!keep.has(k)) { rows.delete(k); d.classList.add('out'); setTimeout(() => d.remove(), 400); } // se ha ido: desaparece
+  for (const r of list.sort((a, b) => a.since - b.since)) {
+    let d = rows.get(r.k);
+    if (!d) { d = whoRow(r); rows.set(r.k, d); roomlist.prepend(d); } // lo más nuevo arriba
+    else if (r.avatar && !d.querySelector('.av img:not(.logo)')) d.querySelector('.av').firstChild.replaceWith(img(r.avatar, ''));
+  }
+  $('roomempty')?.remove();
+  if (!list.length && !roomlist.querySelector('.who:not(.out)')) roomlist.append(Object.assign(el('div', '', 'Aquí verás a quien está viendo el directo.'), { id: 'roomempty' }));
+  $('roomCount').textContent = list.length || '';
+}
+$('roomClear').onclick = () => fetch('/room/clear', { method: 'POST' });
+// Secciones plegables y con alto ajustable (se recuerdan entre recargas)
+function section(name, box, head, list, label, height) {
+  head.onclick = () => { const c = box.classList.toggle('closed'); head.firstChild.textContent = (c ? '▸ ' : '▾ ') + label; store.set(name + 'Closed', c); };
+  if (store.get(name + 'Closed', false)) head.click();
+  list.style.height = store.get(name + 'Height', height) + 'px';
+  new ResizeObserver(() => { if (list.offsetHeight) store.set(name + 'Height', list.offsetHeight); }).observe(list);
+}
+section('room', roombox, $('roomHead'), roomlist, '👥 En la sala', 150);
+section('ev', evbox, $('evHead'), evlist, '⚡ Eventos', 130);
+$('evClear').onclick = () => { evCleared = Date.now(); store.set('evCleared', evCleared); renderEvents(); renderAll(); };
+
+const atEdge = () => look().newestTop ? chat.scrollTop < 40 : chat.scrollHeight - chat.scrollTop - chat.clientHeight < 40;
+function toEdge() { chat.scrollTop = look().newestTop ? 0 : chat.scrollHeight; unseen = 0; more.style.display = 'none'; }
+function trim() {
+  const max = Math.max(5, look().max);
+  while (chat.querySelectorAll('.m').length > max) (look().newestTop ? chat.lastElementChild : chat.firstElementChild).remove();
+}
+function add(m, fresh) {
+  if (!visible(m)) return;
+  $('empty')?.remove();
+  const stick = atEdge(), d = render(m);
+  if (fresh) d.classList.add('new');
+  look().newestTop ? chat.prepend(d) : chat.append(d);
+  trim();
+  if (stick) toEdge();
+  else if (fresh) { unseen++; more.textContent = (look().newestTop ? '↑ ' : '↓ ') + unseen + ' nuevos'; more.style.display = 'block'; }
+}
+function renderAll() {
+  if (!cfg) return;
+  applyLook();
+  chat.replaceChildren();
+  const list = cfg.events.inChat ? [...all, ...evs.filter(m => m.ts > evCleared)].sort((a, b) => a.ts - b.ts) : all;
+  list.forEach(m => add(m, false));
+  renderEvents(); renderRoom();
+  if (!chat.children.length) chat.append(Object.assign(el('div'), { id: 'empty', innerHTML: 'Esperando mensajes…<br>Pulsa 🧪 para ver cómo queda.' }));
+  toEdge();
+}
+
+function showStatus() {
+  const ps = Object.keys(LABEL).filter(p => cfg?.[p]);
+  st.replaceChildren(...ps.map(p => {
+    const txt = status[p] || 'iniciando';
+    const b = el('button', 'st' + (/conectado|en directo/.test(txt) && !/no se pudo/.test(txt) ? ' on' : '') + (hidden.has(p) ? ' off' : ''));
+    b.title = `${txt} · clic para ${hidden.has(p) ? 'mostrar' : 'ocultar'} sus mensajes aquí`;
+    b.append(el('i'), LABEL[p]);
+    b.onclick = () => { hidden.has(p) ? hidden.delete(p) : hidden.add(p); store.set('hiddenPlatforms', [...hidden]); showStatus(); renderAll(); };
+    return b;
+  }));
+}
+
+// ---------- conexión ----------
+function connect() {
+  ws = new WebSocket(`ws://${location.host}/?room`);
+  ws.onmessage = e => {
+    const d = JSON.parse(e.data);
+    if (d.boot && d.boot.at !== store.get('bootSeen', 0) && Date.now() - d.boot.at < 120e3) { // cada arranque se avisa una sola vez
+      store.set('bootSeen', d.boot.at);
+      document.body.append(Object.assign(el('div', '', d.boot.text), { id: 'boot' }));
+      setTimeout(() => $('boot')?.remove(), 6500);
+    }
+    if (d.emotes) emotes = d.emotes;
+    if (d.status) { status = d.status; }
+    if (d.viewers) $('views').textContent = d.viewers.tiktok != null ? `👁 ${d.viewers.tiktok} en TikTok` : '';
+    if (d.cfg && !saving) { cfg = d.cfg; if (dlg.open && !form.contains(document.activeElement)) fill(); } // no pisar lo que se está escribiendo
+    if (d.history) all = d.history.filter(m => m.ts > chatCleared); // lo vaciado no vuelve al recargar
+    if (d.events) evs = d.events;
+    if (d.cfg || d.history) renderAll();
+    if (d.status || d.cfg) showStatus();
+    if (d.msg) { all.push(d.msg); if (all.length > 300) all.shift(); add(d.msg, true); }
+    if (d.ev) addEvent(d.ev);
+    if (d.alert) showAlert(d.alert);
+    if (d.room) { room = d.room; renderRoom(); }
+    if (d.auth) { const a = d.auth; $('twState').textContent = (a.ok ? '✅ ' : '⚪ ') + 'Estado: ' + a.msg; $('twLogout').hidden = !a.ok && a.msg === 'sin conectar'; }
+    if (d.del) { all = all.filter(m => !d.del.includes(m.id)); d.del.forEach(id => chat.querySelector(`.m[data-id="${CSS.escape(id)}"]`)?.remove()); }
+    if (d.join && cfg?.events.join) { const s = el('span'); s.append(el('b', '', d.join.user), ' se ha unido'); join.replaceChildren(s); setTimeout(() => s.remove(), 3000); } // la nueva sustituye a la anterior
+  };
+  ws.onclose = () => { status = {}; showStatus(); setTimeout(connect, 2000); };
+}
+logosReady.then(connect);
+
+// ---------- interacción del dock ----------
+chat.addEventListener('scroll', () => { if (atEdge()) { unseen = 0; more.style.display = 'none'; } });
+more.onclick = toEdge;
+$('testBtn').onclick = () => fetch('/test', { method: 'POST' });
+$('clearBtn').onclick = () => { chatCleared = Date.now(); store.set('chatCleared', chatCleared); all = []; renderAll(); };
+
+// ---------- aviso de moderación de TikTok ----------
+let alertShown = null;
+const closedAlerts = store.get('closedAlerts', []);
+function showAlert(a) {
+  if (!cfg?.events.mod || closedAlerts.includes(a.id)) return;
+  alertShown = a;
+  $('alertTitle').textContent = a.title;
+  $('alertText').textContent = a.text;
+  $('alertMeta').textContent = [new Date(a.ts).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }), a.detail].filter(Boolean).join(' · ');
+  $('alert').hidden = false;
+  $('alertClose').focus();
+}
+$('alertClose').onclick = () => {
+  $('alert').hidden = true;
+  if (alertShown) { closedAlerts.push(alertShown.id); store.set('closedAlerts', closedAlerts.slice(-30)); }
+};
+$('twLogin').onclick = () => { clearTimeout(saveTimer); post().then(() => window.open('/auth/twitch/start', 'twitch', 'width=520,height=760')); };
+$('twLogout').onclick = () => fetch('/auth/twitch/logout', { method: 'POST' });
+
+// ---------- ajustes ----------
+const getPath = (o, p) => p.split('.').reduce((a, k) => a?.[k], o);
+const setPath = (o, p, v) => { const ks = p.split('.'), last = ks.pop(); ks.reduce((a, k) => a[k], o)[last] = v; };
+function buildLookFields() {
+  for (const box of document.querySelectorAll('[data-look]')) {
+    for (const [k, name, type, a, b] of LOOK_FIELDS) {
+      const key = `look.${box.dataset.look}.${k}`;
+      let input;
+      if (type === 'select') { input = el('select'); for (const [v, t] of a) input.append(Object.assign(el('option', '', t), { value: v })); }
+      else input = Object.assign(el('input'), { type: type === 'check' ? 'checkbox' : type, ...(type === 'range' ? { min: a, max: b } : {}) });
+      input.dataset.k = key;
+      const lab = el('label', type === 'check' ? 'ck' : '');
+      if (type === 'check') lab.append(input, ' ' + name);
+      else {
+        lab.append(name);
+        if (type === 'range') { const out = el('span', 'hint'); out.dataset.out = key; lab.firstChild.after(' ', out); }
+        lab.append(input);
+      }
+      if (k === 'customFont') lab.dataset.showIf = `look.${box.dataset.look}.font=custom`;
+      box.append(lab);
+    }
+  }
+}
+function fill() {
+  for (const k of ['twitch', 'youtube', 'tiktok', 'kick']) form.elements[k].value = cfg[k];
+  for (const k of ['ffz', 'bttv', 'seventv']) form.elements[k].checked = cfg[k];
+  for (const i of form.querySelectorAll('[data-k]')) {
+    const v = getPath(cfg, i.dataset.k);
+    i.type === 'checkbox' ? (i.checked = v) : (i.value = v);
+  }
+  refreshForm();
+}
+function refreshForm() {
+  for (const o of form.querySelectorAll('[data-out]')) {
+    const v = getPath(cfg, o.dataset.out);
+    o.textContent = o.dataset.out.endsWith('.bg') ? v + '%' : v + 'px';
+  }
+  for (const lab of form.querySelectorAll('[data-show-if]')) { const [p, v] = lab.dataset.showIf.split('='); lab.hidden = getPath(cfg, p) !== v; }
+}
+let saveTimer, saving = false;
+const post = () => { saving = true; return fetch('/config', { method: 'POST', body: JSON.stringify(cfg) }).finally(() => setTimeout(() => (saving = !!saveTimer && saving), 300)); };
+const save = () => { clearTimeout(saveTimer); saving = true; saveTimer = setTimeout(() => { saveTimer = null; post(); }, 250); };
+form.addEventListener('input', e => {
+  const i = e.target;
+  if (!i.dataset.k) return;
+  const old = getPath(cfg, i.dataset.k);
+  setPath(cfg, i.dataset.k, i.type === 'checkbox' ? i.checked : typeof old === 'number' ? +i.value : i.value);
+  refreshForm(); renderAll(); save(); // vista previa al instante
+});
+$('saveAcc')?.addEventListener('click', () => {
+  for (const k of ['twitch', 'youtube', 'tiktok', 'kick']) cfg[k] = form.elements[k].value.trim();
+  for (const k of ['ffz', 'bttv', 'seventv']) cfg[k] = form.elements[k].checked;
+  clearTimeout(saveTimer); saveTimer = null; post();
+});
+form.addEventListener('keydown', e => { // Intro en un campo no cierra el diálogo; en Cuentas, guarda
+  if (e.key !== 'Enter' || !e.target.matches('input')) return;
+  e.preventDefault();
+  if (['twitch', 'youtube', 'tiktok', 'kick'].includes(e.target.name)) $('saveAcc').click();
+});
+buildLookFields();
+$('gear').onclick = () => { if (cfg) { fill(); dlg.showModal(); } };
+</script>
+</body>
+</html>
