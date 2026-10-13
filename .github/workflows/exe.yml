@@ -58,7 +58,8 @@ jobs:
           # título y explicación: los del commit si empieza por «Livalyst 1.N …» (primera línea y resto)
           git log -1 --format=%s > ../titulo.txt; { git log -1 --format=%b | grep -v -e '^Co-Authored-By:' -e '^Claude-Session:' || true; } > ../notas.txt
           printf '\n**Cómo usarlo:** descarga Livalyst.zip, descomprímelo y abre Livalyst.exe. No hace falta instalar nada.\n' >> ../notas.txt
-          T=$(cat ../titulo.txt); case "$T" in "Livalyst ${V#v}"*) ;; *) T="Livalyst $V";; esac
+          S=${V#v}; S=${S%.0}  # 1.4.0 → 1.4, como en el título del commit
+          T=$(cat ../titulo.txt); case "$T" in "Livalyst $S "*) ;; *) T="Livalyst $V";; esac
           if gh release view "$V" > /dev/null 2>&1; then
             # ya publicada: si este commit es el de la versión, pone al día su título y explicación
             if [ "$T" != "Livalyst $V" ]; then gh release edit "$V" --title "$T" --notes-file ../notas.txt; fi
