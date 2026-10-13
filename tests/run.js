@@ -5,7 +5,7 @@ const root = path.join(__dirname, '..');
 fs.rmSync(path.join(root, 'datos'), { recursive: true, force: true }); // configuración nueva en cada pasada
 const env = { ...process.env }; delete env.APPDATA;
 const server = spawn(process.execPath, ['server.js'], { cwd: root, env, stdio: 'inherit' });
-const TESTS = ['boot', 'check', 'topcheck', 'e2e', 'fx', 'tw', 'room', 'roomclear', 'wsroom', 'lottie']; // boot primero: necesita el servidor recién arrancado
+const TESTS = ['boot', 'check', 'topcheck', 'e2e', 'fx', 'tw', 'room', 'roomclear', 'wsroom', 'lottie', 'anims']; // boot primero: necesita el servidor recién arrancado
 let failed = [];
 setTimeout(() => {
   for (const t of TESTS) {
