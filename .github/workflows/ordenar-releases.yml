@@ -1,4 +1,4 @@
-# Una sola vez: borra las versiones publicadas una a una (v1.20.0 … v1.35.0) y publica
+# Una sola vez (reintento): borra las versiones publicadas una a una (v1.20.0 … v1.35.0) y publica
 # cuatro versiones con los grandes cambios, numeradas seguidas (1.0, 1.1, 1.2 y 1.3).
 # Cada una se fabrica desde su commit, con el número nuevo dentro de la app.
 name: Ordenar versiones
@@ -25,6 +25,8 @@ jobs:
         shell: bash
         run: |
           W=$(pwd)  # rutas relativas: node, csc y bash las entienden igual en Windows
+          exec > >(tee ../registro.txt) 2>&1  # si algo falla, sus últimas líneas salen como aviso en GitHub
+          trap 'tail -n 12 ../registro.txt | sed "s/^/::error::/"; echo "::error::Falló: $BASH_COMMAND"' ERR
           curl -sSfL -o ../rcedit.exe https://github.com/electron/rcedit/releases/download/v2.0.0/rcedit-x64.exe
           CSC=/c/Windows/Microsoft.NET/Framework64/v4.0.30319/csc.exe
           publicar() { # commit, versión, título, notas
