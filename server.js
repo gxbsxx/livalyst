@@ -3,7 +3,7 @@
 const http = require('http'), fs = require('fs'), path = require('path');
 const WebSocket = require('ws');
 
-const VERSION = '1.26';
+const VERSION = '1.27';
 // Tus datos (configuración, cuenta de Twitch, metas, sonidos e imágenes) viven fuera de la carpeta de la app,
 // así cada versión nueva es una carpeta que se puede sustituir entera sin perder nada.
 const DATA = process.env.APPDATA ? path.join(process.env.APPDATA, 'Livalyst') : path.join(__dirname, 'datos');
