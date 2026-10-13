@@ -32,13 +32,6 @@
   @keyframes pop { 40% { transform: scale(1.08); } }
   #saved.on { color: var(--cyan); }
   #saved.bad { background: #4a1426; color: #ffb3c2; font-weight: 600; }
-  #quit { padding: 5px 12px; border-radius: 99px; font-size: 12px; background: none; color: var(--mut); }
-  #quit:hover { color: var(--text); }
-  #quit.sure { border-color: var(--pink); color: #fff; background: var(--pink); }
-  /* pantalla de «Livalyst se ha cerrado» */
-  #bye { position: fixed; inset: 0; z-index: 9; display: grid; place-content: center; gap: 10px; text-align: center; background: var(--ink); animation: fadein .4s ease both; }
-  #bye h2 { margin: 0; font: 800 28px var(--head); }
-  #bye p { margin: 0; color: var(--mut); }
 
   main { display: grid; grid-template-columns: minmax(0, 1fr) minmax(360px, 44%); gap: 24px; padding: 20px 24px 40px; max-width: 1500px; margin: auto; }
   @media (max-width: 980px) { main { grid-template-columns: 1fr; } aside { position: static !important; order: -1; } }
@@ -119,7 +112,6 @@
   <span class="sub">Widgets de TikTok</span>
   <a href="/">Volver al chat</a>
   <span id="saved" role="status">Los cambios se guardan solos</span>
-  <button id="quit" title="Cierra Livalyst del todo (el chat, las alertas y las metas dejan de funcionar hasta que lo vuelvas a abrir)">⏻ Cerrar Livalyst</button>
 </header>
 
 <main>
@@ -374,20 +366,6 @@ document.querySelector('[role=tablist]').addEventListener('keydown', e => { // f
   if (i < 0 || !['ArrowLeft', 'ArrowRight'].includes(e.key)) return;
   const n = tabs[(i + (e.key === 'ArrowRight' ? 1 : -1) + tabs.length) % tabs.length]; n.focus(); n.click();
 });
-// Cerrar Livalyst: primer clic pide confirmación en el propio botón; el segundo lo cierra
-let closing = false, sureTimer;
-$('quit').onclick = async () => {
-  const b = $('quit');
-  if (!b.classList.contains('sure')) {
-    b.classList.add('sure'); b.textContent = '¿Seguro? Pulsa otra vez';
-    clearTimeout(sureTimer); sureTimer = setTimeout(() => { b.classList.remove('sure'); b.textContent = '⏻ Cerrar Livalyst'; }, 3000);
-    return;
-  }
-  closing = true;
-  await fetch('/quit', { method: 'POST' }).catch(() => {});
-  document.body.append(mk('div', { id: 'bye' }, mk('h2', { textContent: 'Livalyst se ha cerrado' }),
-    mk('p', { textContent: 'Para volver a abrirlo, haz doble clic en Livalyst.exe.' })));
-};
 $('reset').onclick = () => confirm('¿Poner a cero likes, seguidores, monedas y compartidos de este directo?') && fetch('/stats/reset', { method: 'POST' });
 $('file').onchange = async e => {
   for (const f of e.target.files) {
@@ -407,7 +385,7 @@ async function start() {
     if (d.cfg && !cfg) { cfg = d.cfg; build(); }   // solo la primera vez: así no se pisa lo que estás escribiendo
     else if (d.cfg) cfg = { ...d.cfg, widgets: cfg.widgets };
   };
-  ws.onclose = () => { if (closing) return; $('saved').textContent = '⚠ Sin conexión con Livalyst: ábrelo con «Livalyst.exe»'; $('saved').className = 'bad'; setTimeout(start, 3000); };
+  ws.onclose = () => { $('saved').textContent = '⚠ Sin conexión con Livalyst: ábrelo con «Livalyst.exe»'; $('saved').className = 'bad'; setTimeout(start, 3000); };
 }
 for (const seg of document.querySelectorAll('.seg')) seg.prepend(Object.assign(document.createElement('span'), { className: 'thumb' }));
 setSeg('bg', store('bg') || 'dark');
