@@ -25,7 +25,7 @@ jobs:
         shell: bash
         run: |
           W=$(pwd)  # rutas relativas: node, csc y bash las entienden igual en Windows
-          exec > >(tee ../registro.txt) 2>&1  # si algo falla, sus últimas líneas salen como aviso en GitHub
+          set -E; exec > >(tee ../registro.txt) 2>&1  # si algo falla, sus últimas líneas salen como aviso en GitHub
           trap 'tail -n 12 ../registro.txt | sed "s/^/::error::/"; echo "::error::Falló: $BASH_COMMAND"' ERR
           curl -sSfL -o ../rcedit.exe https://github.com/electron/rcedit/releases/download/v2.0.0/rcedit-x64.exe
           CSC=/c/Windows/Microsoft.NET/Framework64/v4.0.30319/csc.exe
