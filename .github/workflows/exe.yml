@@ -21,8 +21,8 @@ jobs:
       - name: Fabricar el icono de la bandeja
         shell: pwsh
         run: |
-          & "$env:WINDIR\Microsoft.NET\Framework64\v4.0.30319\csc.exe" /nologo /target:winexe /win32icon:build/livalyst.ico /out:dist/Livalyst/LivalystBandeja.exe build/bandeja.cs
-          if ($LASTEXITCODE -ne 0) { throw "No se pudo compilar el icono de la bandeja" }
+          $o = & "$env:WINDIR\Microsoft.NET\Framework64\v4.0.30319\csc.exe" /nologo /target:winexe /codepage:65001 /win32icon:build\bandeja.ico /out:dist\Livalyst\LivalystBandeja.exe build\bandeja.cs 2>&1
+          if ($LASTEXITCODE -ne 0) { $o | ForEach-Object { "::error::$_" }; throw "No se pudo compilar el icono de la bandeja" }
       - name: Montar la carpeta portable
         shell: bash
         run: |
