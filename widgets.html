@@ -70,8 +70,8 @@
   input[type=color]::-webkit-color-swatch-wrapper { padding: 0; }
   input[type=color]::-webkit-color-swatch { border: 0; border-radius: 5px; }
   input[type=range] { height: 36px; padding: 0; border: 0; background: none; accent-color: var(--pink); }
-  .switch { appearance: none; width: 40px; height: 22px; padding: 0; border-radius: 99px; background: var(--line); position: relative; cursor: pointer; transition: background .2s; }
-  .switch::after { content: ''; position: absolute; top: 3px; left: 3px; width: 16px; height: 16px; border-radius: 50%; background: #fff; transition: transform .2s; }
+  .switch { appearance: none; flex: none; width: 40px; height: 22px; padding: 0; border: 0; border-radius: 99px; background: #463f72; position: relative; cursor: pointer; transition: background .2s; }
+  .switch::after { content: ''; position: absolute; top: 3px; left: 3px; width: 16px; height: 16px; border-radius: 50%; background: #fff; box-shadow: 0 1px 3px #0006; transition: transform .2s var(--ease); }
   .switch:checked { background: var(--pink); }
   .switch:checked::after { transform: translateX(18px); }
   button { height: 36px; padding: 0 13px; border-radius: 9px; border: 1px solid var(--line); background: var(--raise); color: var(--text); font: 600 13px system-ui, sans-serif; cursor: pointer; }
