@@ -4,8 +4,8 @@ Chat unificado, alertas y metas para OBS. Junta en un solo sitio el chat y los e
 
 ## Qué incluye
 
-- **Panel del chat** para OBS (dock): todos los chats juntos, con emotes de FrankerFaceZ, BTTV y 7TV, eventos (regalos, subs, follows…) y quién está en la sala.
-- **Alertas** de regalos, seguidores, subs y compartidos, con 15 temas, efectos de partículas, sonidos e imágenes propios.
+- **Panel del chat** para OBS (dock): todos los chats juntos, con emotes de FrankerFaceZ, BTTV y 7TV, eventos (regalos, subs, follows…) y quién ha pasado por tu directo.
+- **Alertas** de regalos, seguidores, subs y compartidos, con 15 temas.
 - **Metas** (likes, seguidores, monedas, compartidos) y **ranking de top regaladores**.
 - **Avisos de moderación de TikTok** (por ejemplo, la restricción +18) en grande para que no se te pasen.
 
@@ -16,14 +16,15 @@ Chat unificado, alertas y metas para OBS. Junta en un solo sitio el chat y los e
 2. Mientras está abierto, aparece su icono junto al reloj de Windows. Clic derecho en él → **Cerrar Livalyst**. Abrir otra vez **Livalyst.exe** también cierra solo la copia anterior.
 3. En OBS:
    - Panel del chat: *Docks → Docks de navegador personalizados* con `http://localhost:8787`
-   - Configurar widgets: abre `http://localhost:8787/widgets`
-   - Alertas: fuente de navegador de 800 × 600 con `http://localhost:8787/alertas`
-   - Metas: fuente de navegador de 600 × 120 con `http://localhost:8787/meta?t=likes` (o `follows`, `diamonds`, `shares`)
-   - Ranking: fuente de navegador de 600 × 260 con `http://localhost:8787/meta?t=top`
+   - Configurar widgets: abre el archivo 'Livalyst Widgets.url'
+   - Alertas: fuente de navegador de 800 × 600
+   - Metas: fuente de navegador de 600 × 120
+   - Ranking: fuente de navegador de 600 × 260
 
 Tus ajustes se guardan aparte (en `%APPDATA%\Livalyst`), así que actualizar la app no los borra.
 
 ## Comprobar que todo funciona
+En la carpeta del programa `Alt + D` escribes `cmd` y dentro
 
 ```
 npm test
