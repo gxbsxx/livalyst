@@ -27,8 +27,13 @@
   .st.on i { background: #3ddc84; }
   .st.off { opacity: .35; text-decoration: line-through; }
   #views { font-size: 11px; }
-  /* barra de acciones: cuatro botones iguales, con icono y nombre; «Editar directo» destacado */
-  .tools { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; container-type: inline-size; }
+  /* barra de acciones: tres botones iguales, con icono y nombre; «Editar directo» destacado */
+  .tools { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; container-type: inline-size; }
+  /* ajustes, aparte: arriba a la derecha */
+  .gear { margin-left: auto; display: grid; place-items: center; width: 28px; height: 28px; padding: 0; border-radius: 50%; border: 1px solid var(--line);
+    background: #ffffff08; font-size: 14px; cursor: pointer; transition: background .15s, border-color .15s, transform .3s; }
+  .gear:hover { background: #ffffff14; border-color: #3c3c46; transform: rotate(45deg); }
+  .gear:focus-visible { outline: 2px solid var(--acc); outline-offset: 1px; }
   .tool { display: flex; flex-direction: column; align-items: center; gap: 3px; min-width: 0; padding: 6px 2px 5px; border-radius: 9px;
     border: 1px solid var(--line); background: #ffffff08; color: var(--mut); font: 600 10.5px/1.1 "Segoe UI", system-ui, sans-serif;
     cursor: pointer; text-align: center; transition: background .15s, color .15s, border-color .15s, transform .1s; }
@@ -194,17 +199,16 @@
 </style>
 <body>
 <header id="head">
-  <div class="hrow"><span id="st"></span><span id="views"></span></div>
+  <div class="hrow"><span id="st"></span><span id="views"></span><button class="gear" id="gear" title="Ajustes: cuentas, apariencia, filtros y eventos" aria-label="Ajustes">⚙️</button></div>
   <nav class="tools" aria-label="Acciones">
     <button class="tool pri" id="liveBtn" title="Cambiar el título y la categoría del directo"><span class="ic" aria-hidden="true">✏️</span><span class="tx">Editar directo</span></button>
     <button class="tool" id="testBtn" title="Enviar mensajes y eventos de prueba al chat"><span class="ic" aria-hidden="true">🧪</span><span class="tx">Probar</span></button>
-    <button class="tool" id="clearBtn" title="Vaciar el chat (solo aquí, no en las plataformas)"><span class="ic" aria-hidden="true">🧹</span><span class="tx">Vaciar chat</span></button>
-    <button class="tool" id="gear" title="Ajustes: cuentas, apariencia, filtros y eventos"><span class="ic" aria-hidden="true">⚙️</span><span class="tx">Ajustes</span></button>
+    <button class="tool" id="clearBtn" title="Vaciar el chat, los eventos y la sala (solo aquí, no en las plataformas)"><span class="ic" aria-hidden="true">🧹</span><span class="tx">Vaciar todo</span></button>
   </nav>
 </header>
 <div id="alert" hidden><div class="alertbox" role="alertdialog" aria-labelledby="alertTitle"><h2 id="alertTitle"></h2><p id="alertText"></p><p class="meta" id="alertMeta"></p><button id="alertClose">Entendido, cerrar</button></div></div>
-<section id="evbox"><div id="evbar" class="secbar"><button id="evHead" title="Mostrar u ocultar">▾ ⚡ Eventos<span id="evCount"></span></button><span class="sp"></span><button id="evClear" title="Vaciar la lista de eventos">🧹</button></div><div id="evlist"></div></section>
-<section id="roombox"><div id="roombar" class="secbar"><button id="roomHead" title="Mostrar u ocultar">▾ 👥 En la sala<span id="roomCount"></span></button><span class="sp"></span><button id="roomClear" title="Vaciar la sala (quien siga dentro volverá a salir en cuanto escriba, regale, dé likes o entre de nuevo)">🧹</button></div><div id="roomlist"></div></section>
+<section id="evbox"><div id="evbar" class="secbar"><button id="evHead" title="Mostrar u ocultar">▾ ⚡ Eventos<span id="evCount"></span></button></div><div id="evlist"></div></section>
+<section id="roombox"><div id="roombar" class="secbar"><button id="roomHead" title="Mostrar u ocultar">▾ 👥 En la sala<span id="roomCount"></span></button></div><div id="roomlist"></div></section>
 <div id="chatbar" class="secbar">💬 Chat</div>
 <main><div id="chat"><div id="empty">Esperando mensajes…<br>Pulsa 🧪 para ver cómo queda.</div></div><button id="more"></button></main>
 <div id="join"></div>
@@ -456,7 +460,6 @@ function renderRoom() {
   if (!list.length && !roomlist.querySelector('.who:not(.out)')) roomlist.append(Object.assign(el('div', '', 'Aquí verás a quien está viendo el directo.'), { id: 'roomempty' }));
   $('roomCount').textContent = list.length || '';
 }
-$('roomClear').onclick = () => fetch('/room/clear', { method: 'POST' });
 // Secciones plegables y con alto ajustable (se recuerdan entre recargas)
 function section(name, box, head, list, label, height) {
   head.onclick = () => { const c = box.classList.toggle('closed'); head.firstChild.textContent = (c ? '▸ ' : '▾ ') + label; store.set(name + 'Closed', c); };
@@ -466,7 +469,6 @@ function section(name, box, head, list, label, height) {
 }
 section('room', roombox, $('roomHead'), roomlist, '👥 En la sala', 150);
 section('ev', evbox, $('evHead'), evlist, '⚡ Eventos', 130);
-$('evClear').onclick = () => { evCleared = Date.now(); store.set('evCleared', evCleared); renderEvents(); renderAll(); };
 
 const atEdge = () => look().newestTop ? chat.scrollTop < 40 : chat.scrollHeight - chat.scrollTop - chat.clientHeight < 40;
 function toEdge() { chat.scrollTop = look().newestTop ? 0 : chat.scrollHeight; unseen = 0; more.style.display = 'none'; }
@@ -541,7 +543,10 @@ logosReady.then(connect);
 chat.addEventListener('scroll', () => { if (atEdge()) { unseen = 0; more.style.display = 'none'; } });
 more.onclick = toEdge;
 $('testBtn').onclick = () => fetch('/test', { method: 'POST' });
-$('clearBtn').onclick = () => { chatCleared = Date.now(); store.set('chatCleared', chatCleared); all = []; renderAll(); };
+$('clearBtn').onclick = () => { // vacía el chat, los eventos y la sala de una vez (solo aquí, no en las plataformas)
+  chatCleared = evCleared = Date.now(); store.set('chatCleared', chatCleared); store.set('evCleared', evCleared); all = [];
+  renderEvents(); renderAll(); fetch('/room/clear', { method: 'POST' });
+};
 
 // ---------- aviso de moderación de TikTok ----------
 let alertShown = null;
