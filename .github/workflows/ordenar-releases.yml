@@ -40,7 +40,7 @@ jobs:
             cp -r logos ../dist/Livalyst/
             (cd ../dist/Livalyst && npm ci --omit=dev --silent)
             (cd ../dist && pwsh -c "Compress-Archive -Path Livalyst -DestinationPath Livalyst.zip")
-            gh release create "v$2.0" ../dist/Livalyst.zip -R "$GITHUB_REPOSITORY" --target "$T" --title "$3" --notes "$4
+            gh release create "v$2.0" ../dist/Livalyst.zip -R "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" --title "$3" --notes "$4
 
           **Cómo usarlo:** descarga Livalyst.zip, descomprímelo y abre Livalyst.exe. No hace falta instalar nada."
             cd "$W" && git worktree remove -f ../src
