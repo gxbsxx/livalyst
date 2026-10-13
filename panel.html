@@ -208,7 +208,7 @@
       <label>Categoría en Twitch<input type="text" id="liveCat" role="combobox" aria-expanded="false" aria-controls="liveList" aria-autocomplete="list" autocomplete="off" placeholder="Escribe para buscar…"></label>
       <ul id="liveList" role="listbox" aria-label="Categorías de Twitch" hidden></ul>
     </div>
-    <div class="tkrow"><span>🎵 En TikTok se cambia en su web oficial.</span><button type="button" class="btn" id="tkOpen">Abrir TikTok LIVE Monitor</button></div>
+    <div class="tkrow"><span>🎵 En TikTok se cambia en su web oficial (se abre en tu navegador).</span><button type="button" class="btn" id="tkOpen">Abrir TikTok LIVE Monitor</button></div>
     <p class="hint" id="liveMsg" role="status" style="font-size:12px"></p>
     <menu style="margin:0"><button class="btn" value="close">Cerrar</button><button type="button" class="btn pri" id="liveSave">Guardar en Twitch</button></menu>
   </form>
@@ -633,7 +633,10 @@ $('liveBtn').onclick = async () => {
     $('liveTitle').value = d.title; liveGame = d.game; $('liveCat').value = d.game?.name || ''; liveCount(); $('liveTitle').focus();
   }
 };
-$('tkOpen').onclick = () => window.open('https://livecenter.tiktok.com/live_monitor?apply_mode=11', 'tiktok', 'width=1200,height=820');
+$('tkOpen').onclick = async () => { // se abre en el navegador normal (Chrome…); si no se puede, en una ventana aquí
+  const r = await fetch('/open/tiktok', { method: 'POST' }).catch(() => null);
+  if (r?.ok) liveMsg('Abierto en tu navegador.', 'ok'); else window.open('https://livecenter.tiktok.com/live_monitor?apply_mode=11', 'tiktok', 'width=1200,height=820');
+};
 $('liveConnect').onclick = () => {
   if ($('liveConnect').dataset.need === 'scope') { window.open('/auth/twitch/start', 'twitch', 'width=520,height=760'); liveMsg('Cuando Twitch diga «Cuenta conectada», cierra esa ventana y vuelve a pulsar ✏️.'); }
   else { $('live').close(); $('gear').click(); $('twAcc').open = true; }
