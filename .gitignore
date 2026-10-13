@@ -4,3 +4,5 @@ datos/
 .DS_Store
 tests/*.png
 tests/node_modules/
+build/rcedit.exe
+dist/

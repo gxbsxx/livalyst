@@ -3,14 +3,19 @@
 const { execFileSync } = require('child_process'), fs = require('fs'), path = require('path');
 const root = path.join(__dirname, '..'), out = path.resolve(process.argv[2] || path.join(root, 'dist')), win = process.platform === 'win32';
 const exe = path.join(out, win ? 'Livalyst.exe' : 'Livalyst');
-const run = (cmd, args) => execFileSync(cmd, args, { cwd: root, stdio: 'inherit', shell: win });
+const run = (cmd, args) => {
+  try { execFileSync(cmd, args, { cwd: root, stdio: 'inherit', shell: win && cmd === 'npx' }); }
+  catch (e) { console.log(`::error::Falló «${path.basename(cmd)} ${args[0]}»: ${e.message.split('\n')[0]}`); process.exit(1); } // ::error:: sale en el resumen de GitHub
+};
 fs.mkdirSync(out, { recursive: true });
 
 const blob = path.join(out, 'sea.blob'), conf = path.join(out, 'sea-config.json');
 fs.writeFileSync(conf, JSON.stringify({ main: path.join(root, 'exe.js'), output: blob, disableExperimentalSEAWarning: true }));
 run(process.execPath, ['--experimental-sea-config', conf]);
 fs.copyFileSync(process.execPath, exe);
-if (win) run('npx', ['--yes', 'rcedit@4.0.1', exe, '--set-icon', path.join(__dirname, 'livalyst.ico'),
+// Icono y nombre: rcedit.exe (de electron/rcedit) lo descarga el flujo de GitHub; sin él, el .exe sale con el icono de Node
+const rcedit = path.join(__dirname, 'rcedit.exe');
+if (win && fs.existsSync(rcedit)) run(rcedit, [exe, '--set-icon', path.join(__dirname, 'livalyst.ico'),
   '--set-version-string', 'ProductName', 'Livalyst', '--set-version-string', 'FileDescription', 'Livalyst']);
 run('npx', ['--yes', 'postject@1.0.0-alpha.6', exe, 'NODE_SEA_BLOB', blob, '--sentinel-fuse', 'NODE_SEA_FUSE_fce680ab2cc467b6e072b8b5df1996b2']);
 

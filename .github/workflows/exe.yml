@@ -15,7 +15,10 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: 22 }
       - name: Fabricar Livalyst.exe
-        run: node build/make-exe.js dist/Livalyst
+        shell: bash
+        run: |
+          curl -sSfL -o build/rcedit.exe https://github.com/electron/rcedit/releases/download/v2.0.0/rcedit-x64.exe
+          node build/make-exe.js dist/Livalyst
       - name: Montar la carpeta portable
         shell: bash
         run: |
