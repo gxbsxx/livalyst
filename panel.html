@@ -73,19 +73,22 @@
   #chatbar { margin: 4px 6px 0; color: var(--mut); border-bottom: 1px solid var(--line); }
   #evlist { height: 140px; min-height: 40px; max-height: 70vh; overflow-y: auto; resize: vertical; padding: 4px 6px 6px; scrollbar-width: thin; }
   #evbox.closed #evlist { display: none; }
-  .evi { display: grid; grid-template-columns: auto 1fr auto; gap: 8px; align-items: center; padding: 6px 8px; margin: 4px 0; border-radius: 10px;
-    background: color-mix(in srgb, var(--ec) 13%, #17142c); border-left: 3px solid var(--ec); font-size: .92em; }
-  .evi .ico { width: 2em; height: 2em; display: grid; place-items: center; border-radius: 50%; font-size: 1em;
-    background: color-mix(in srgb, var(--ec) 28%, transparent); box-shadow: 0 0 0 1px color-mix(in srgb, var(--ec) 55%, transparent); }
-  .evi .body { min-width: 0; }
-  .evi .l1 { display: flex; align-items: center; gap: 4px; min-width: 0; }
-  .evi .l1 .u { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #fff; }
-  .evi .l2 { color: #c9c3e6; font-size: .9em; overflow-wrap: anywhere; }
-  .evi .t { align-self: start; margin: 0; }
-  .evi .amt { margin-left: auto; padding-left: 6px; }
+  /* evento: una entrada con la matriz de color a la izquierda y un troquel con dos muescas (recortadas de verdad: se ve el fondo) */
+  .evi { --cut: 6px; display: grid; grid-template-columns: 2.6em 1fr auto; align-items: stretch; margin: 5px 0; border-radius: 9px; font-size: .92em;
+    background: color-mix(in srgb, var(--ec) 10%, #26224a);
+    -webkit-mask: radial-gradient(circle var(--cut) at 2.6em 0, #0000 98%, #000) top / 100% 51% no-repeat, radial-gradient(circle var(--cut) at 2.6em 100%, #0000 98%, #000) bottom / 100% 51% no-repeat;
+            mask: radial-gradient(circle var(--cut) at 2.6em 0, #0000 98%, #000) top / 100% 51% no-repeat, radial-gradient(circle var(--cut) at 2.6em 100%, #0000 98%, #000) bottom / 100% 51% no-repeat; }
+  .evi .ico { display: grid; place-items: center; background: var(--ec); font-size: 1.15em; }
+  .evi .body { min-width: 0; padding: 6px 8px 6px 10px; border-left: 2px dashed color-mix(in srgb, var(--ec) 55%, transparent); }
+  .evi .l1 { display: flex; align-items: center; gap: 6px; min-width: 0; }
+  .evi .l1 .u { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #fff; font-weight: 700; }
+  .evi .l2 { color: #c9c3e6; font-size: .92em; overflow-wrap: anywhere; }
+  .evi .side { display: grid; justify-items: end; align-content: center; gap: 3px; padding: 6px 8px 6px 0; }
+  .evi .t { margin: 0; font-variant-numeric: tabular-nums; }
+  .evi .amt { margin: 0; padding: 1px 7px; border-radius: 999px; background: var(--ec); color: #15132a; font-size: .85em; }
   .evi img { height: 1.4em; vertical-align: middle; margin: -.2em 1px; }
-  .evi img.logo { height: 1em; margin: 0; }
-  .evi.big { background: color-mix(in srgb, #ffc93c 18%, #17142c); }
+  .evi img.logo, .evi .l1 .p { height: 1.15em; width: 1.15em; object-fit: contain; flex: none; margin: 0; padding: 1px; border-radius: 4px; background: #15132a; }
+  .evi.big { background: color-mix(in srgb, var(--ec) 24%, #26224a); }
   .evi.new { animation: flash 1.2s ease-out; }
   @keyframes flash { from { background: color-mix(in srgb, var(--ec) 55%, transparent); } }
   /* sala: quién está viendo el directo */
@@ -96,16 +99,15 @@
   #roomlist { height: 150px; min-height: 40px; max-height: 60vh; overflow-y: auto; resize: vertical; padding: 4px 6px 6px; scrollbar-width: thin; }
   #roombox.closed #roomlist { display: none; }
   #roomlist { display: grid; grid-template-columns: repeat(auto-fill, minmax(4.6em, 1fr)); gap: 4px; align-content: start; }
-  .who { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 5px 2px 4px; border-radius: 8px; min-width: 0;
+  .who { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 8px 2px 5px; border-radius: 8px; min-width: 0;
     background: #ffffff08; transition: opacity .4s, transform .4s; }
   .who:hover { background: #ffffff12; }
   .who.in { animation: whoin .5s ease-out; }
   .who.out { opacity: 0; transform: scale(.6); }
   @keyframes whoin { from { opacity: 0; transform: scale(.6); background: #25f4ee44; } }
   .av { position: relative; flex: none; width: 1.9em; height: 1.9em; }
-  .av img, .av .ini { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; box-shadow: 0 0 0 1.5px var(--pc); }
+  .av img, .av .ini { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; box-shadow: 0 0 0 1.5px #0e2022, 0 0 0 4px var(--pc); } /* el aro dice de qué plataforma viene */
   .av .ini { display: grid; place-items: center; font-weight: 700; color: #000; font-size: .7em; }
-  .av .p, .av img.logo { position: absolute; right: -3px; bottom: -2px; width: auto; height: .7em; margin: 0; border-radius: 2px; box-shadow: none; font-size: .4em; line-height: 1.75em; padding: 0 2px; }
   .who .u { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: .72em; }
   #roomempty { grid-column: 1 / -1; color: var(--mut); font-size: 11px; text-align: center; padding: 10px 0; }
 
@@ -361,12 +363,13 @@ const evbox = $('evbox'), evlist = $('evlist'), evCount = $('evCount');
 function renderEvent(m, fresh) {
   const d = el('div', 'evi ' + m.p + (m.big ? ' big' : '') + (fresh ? ' new' : ''));
   d.style.setProperty('--ec', EVC[m.ev] || '#9146ff');
-  const l1 = el('div', 'l1'), l2 = el('div', 'l2'), body = el('div', 'body');
+  const l1 = el('div', 'l1'), l2 = el('div', 'l2'), body = el('div', 'body'), side = el('div', 'side');
   l1.append(logo[m.p] ? img(logo[m.p], LABEL[m.p], 'logo') : el('span', 'p ' + m.p, LABEL[m.p]), el('span', 'u', m.user));
-  if (m.amount) l1.append(el('span', 'amt', m.amount));
   for (const part of m.parts) l2.append(part.img ? img(part.img, part.alt) : part.t);
   body.append(l1, l2);
-  d.append(el('span', 'ico', EV[m.ev][0]), body, el('span', 't', new Date(m.ts).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })));
+  if (m.amount) side.append(el('span', 'amt', m.amount));
+  side.append(el('span', 't', new Date(m.ts).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })));
+  d.append(el('span', 'ico', EV[m.ev][0]), body, side);
   d.title = EV[m.ev][1];
   return d;
 }
@@ -393,10 +396,9 @@ const roombox = $('roombox'), roomlist = $('roomlist'), rows = new Map();
 let room = [];
 function whoRow(r) {
   const d = el('div', 'who in ' + r.p), av = el('span', 'av');
-  av.append(r.avatar ? img(r.avatar, '') : Object.assign(el('span', 'ini', ([...r.user][0] || '?').toUpperCase()), { style: `background:${hue(r.user)}` }),
-    logo[r.p] ? img(logo[r.p], LABEL[r.p], 'logo') : el('span', 'p ' + r.p, LABEL[r.p]));
+  av.append(r.avatar ? img(r.avatar, '') : Object.assign(el('span', 'ini', ([...r.user][0] || '?').toUpperCase()), { style: `background:${hue(r.user)}` }));
   d.append(av, el('span', 'u', r.user));
-  d.title = r.user + ' · entró a las ' + new Date(r.since).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+  d.title = r.user + ' (' + ({ twitch: 'Twitch', tiktok: 'TikTok', youtube: 'YouTube', kick: 'Kick' }[r.p] || r.p) + ') · entró a las ' + new Date(r.since).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
   return d;
 }
 function renderRoom() {
@@ -406,7 +408,7 @@ function renderRoom() {
   for (const r of list.sort((a, b) => a.since - b.since)) {
     let d = rows.get(r.k);
     if (!d) { d = whoRow(r); rows.set(r.k, d); roomlist.prepend(d); } // lo más nuevo arriba
-    else if (r.avatar && !d.querySelector('.av img:not(.logo)')) d.querySelector('.av').firstChild.replaceWith(img(r.avatar, ''));
+    else if (r.avatar && !d.querySelector('.av img')) d.querySelector('.av').firstChild.replaceWith(img(r.avatar, ''));
   }
   $('roomempty')?.remove();
   if (!list.length && !roomlist.querySelector('.who:not(.out)')) roomlist.append(Object.assign(el('div', '', 'Aquí verás a quien está viendo el directo.'), { id: 'roomempty' }));
