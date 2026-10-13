@@ -11,5 +11,6 @@ App local (Node.js, puerto 8787) para streamers: chat unificado de Twitch/TikTok
 - Soluciones mínimas que funcionen (estilo Ponytail): reutilizar lo que ya existe, sin dependencias nuevas salvo que hagan falta de verdad.
 - Antes de dar algo por terminado: `node server.js test` debe dar `ok`, y lo visual se comprueba con capturas.
 - Seguridad: el servidor solo atiende a este PC (`trusted()`); nunca usar innerHTML con texto que venga de un chat.
-- Versión: `VERSION` en `server.js` y `version` en `package.json` van a la par (1.x: cambios pequeños suben el segundo número).
+- Versión: `VERSION` en `server.js` y `version` en `package.json` van a la par.
+- Publicar: los arreglos se prueban e instalan en el PC del dueño, pero NO se suben a GitHub ni cambian la versión. Solo cuando el dueño dice «Quiero que subas esta nueva versión» se sube la versión (+1 en el segundo número), se hace un commit con todo lo acumulado y `git push` (eso publica la Release).
 - Al cambiar el nombre de la app, actualizarlo en todos los archivos y borrar los que queden con el nombre viejo.
