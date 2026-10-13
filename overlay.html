@@ -11,6 +11,7 @@
     text-wrap: balance; font-size: var(--size); color: var(--color);
     font-weight: 800; line-height: 1.15; text-shadow: 0 2px 8px #000c, 0 0 3px #000; }
   .al img, .al video { max-width: 70vw; max-height: 55vh; }
+  .al .lot { width: min(42vh, 60vw); aspect-ratio: 1; } /* animación Lottie */
   .al .pic { width: 2.8em; height: 2.8em; border-radius: 50%; object-fit: cover; box-shadow: 0 0 0 .12em var(--accent); }
   .al .gi { width: 2.8em; height: 2.8em; object-fit: contain; }
   .al .emo { font-size: 2.4em; }
@@ -611,7 +612,8 @@ function next() {
   busy = true;
   const fx = theme(s, { '--size': s.size + 'px', '--color': s.color, '--accent': s.accent });
   const card = el('div', 'al ' + s.anim);
-  if (a.image && /\.(webm|mp4)$/i.test(a.image)) { const v = el('video'); Object.assign(v, { src: media(a.image), autoplay: true, muted: true, loop: true }); card.append(v); }
+  if (a.image && /\.json$/i.test(a.image)) { const l = el('div', 'lot'); card.append(l); lottieIn(l, media(a.image)); }
+  else if (a.image && /\.(webm|mp4)$/i.test(a.image)) { const v = el('video'); Object.assign(v, { src: media(a.image), autoplay: true, muted: true, loop: true }); card.append(v); }
   else if (a.image) { const i = el('img'); i.src = media(a.image); card.append(i); }
   else if (m.ev === 'gift' && m.icon) { const i = el('img', 'gi'); i.src = m.icon; card.append(i); }
   else if (m.avatar) { const i = el('img', 'pic'); i.src = m.avatar; card.append(i); }
@@ -629,6 +631,12 @@ function next() {
     card.classList.add('out');
     setTimeout(() => { fit.remove(); busy = false; next(); }, 450);
   }, Math.max(1, a.duration) * 1000);
+}
+// Animaciones Lottie: el reproductor se carga la primera vez que hace falta (no pesa nada si no usas ninguna)
+let lottieLib;
+function lottieIn(box, src) {
+  lottieLib ??= new Promise((ok, ko) => { const s = el('script'); s.src = '/lib/lottie.js'; s.onload = () => ok(window.lottie); s.onerror = ko; document.head.append(s); });
+  lottieLib.then(L => { L.loadAnimation({ container: box, renderer: 'svg', loop: true, autoplay: true, path: src }); fitAlert(); }).catch(() => box.remove());
 }
 function push(m, test) { m = { ...m, ev: SAME_AS[m.ev] || m.ev }; if (!wanted(m, test)) return; if (queue.length < 50) queue.push(m); next(); }
 window.preview = () => { queue = []; clearTimeout(hideTimer); busy = false; parts = []; push({ p: 'tiktok', ev: 'gift', user: 'Prueba', gift: 'Rosa', n: 5, diamonds: 5 }, true); }; // lo usa el panel al cambiar de tema

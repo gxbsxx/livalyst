@@ -127,9 +127,9 @@
       <div class="card">
         <div class="head"><h3>Sonidos e imágenes</h3></div>
         <label>Subir archivos
-          <input type="file" id="file" accept=".mp3,.wav,.ogg,.gif,.png,.jpg,.jpeg,.webp,.webm,.mp4" multiple>
+          <input type="file" id="file" accept=".mp3,.wav,.ogg,.gif,.png,.jpg,.jpeg,.webp,.webm,.mp4,.json" multiple>
         </label>
-        <p class="hint">Se guardan en la carpeta <code>media</code> de Livalyst y aparecen en los desplegables de cada alerta. Admite mp3, wav, ogg, gif, png, jpg, webp, webm y mp4 (hasta 30 MB).</p>
+        <p class="hint">Se guardan en la carpeta <code>media</code> de Livalyst y aparecen en los desplegables de cada alerta. Admite mp3, wav, ogg, gif, png, jpg, webp, webm y mp4 (hasta 30 MB), y animaciones <b>Lottie</b>: en <b>lottiefiles.com</b> elige una gratis, descárgala como «Lottie JSON» y súbela aquí.</p>
         <p class="hint" id="mlist"></p>
       </div>
     </div>
@@ -190,7 +190,7 @@ function field(label, path, type = 'text', opts) {
 }
 const custom = l => (l.dataset.custom = '', l); // solo se ve con el tema Personalizado
 const mediaOpts = re => [['', '— ninguno —'], ...media.filter(n => re.test(n)).map(n => [n, n])];
-const SOUND = /\.(mp3|wav|ogg)$/i, IMAGE = /\.(gif|png|jpe?g|webp|webm|mp4)$/i;
+const SOUND = /\.(mp3|wav|ogg)$/i, IMAGE = /\.(gif|png|jpe?g|webp|webm|mp4|json)$/i; // .json = animación Lottie
 const fonts = FONTS.map(f => [f, f === 'system' ? 'La del sistema' : f]);
 const div2 = (a, b) => mk('div', { className: 'two' }, a, b);
 const head = (title, ...rest) => mk('div', { className: 'head' }, mk('h3', { textContent: title }), mk('span', { className: 'sp' }), ...rest);
@@ -207,7 +207,7 @@ function build() {
     const c = mk('div', { className: 'card' + (W().alerts[k].on ? '' : ' off') }, head(name, field(name + ' activada', p + '.on', 'checkbox')),
       field('Texto', p + '.text'),
       div2(field('Sonido', p + '.sound', 'select', mediaOpts(SOUND)), field('Volumen', p + '.volume', 'range', { min: 0, max: 100 })),
-      div2(field('Imagen, GIF o vídeo', p + '.image', 'select', mediaOpts(IMAGE)), field('Duración (s)', p + '.duration', 'number', { min: 1, max: 60 })));
+      div2(field('Imagen, GIF, vídeo o Lottie', p + '.image', 'select', mediaOpts(IMAGE)), field('Duración (s)', p + '.duration', 'number', { min: 1, max: 60 })));
     if (k === 'gift') c.append(field('Solo regalos de al menos (monedas)', p + '.min', 'number', { min: 0 }));
     return c;
   }));

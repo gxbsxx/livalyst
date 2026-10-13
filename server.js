@@ -3,7 +3,7 @@
 const http = require('http'), fs = require('fs'), path = require('path');
 const WebSocket = require('ws');
 
-const VERSION = '1.23';
+const VERSION = '1.24';
 // Tus datos (configuración, cuenta de Twitch, metas, sonidos e imágenes) viven fuera de la carpeta de la app,
 // así cada versión nueva es una carpeta que se puede sustituir entera sin perder nada.
 const DATA = process.env.APPDATA ? path.join(process.env.APPDATA, 'Livalyst') : path.join(__dirname, 'datos');
@@ -183,7 +183,7 @@ function addTop(t, login, user, diamonds) {
 }
 
 const MEDIA = path.join(DATA, 'media');
-const MEDIA_TYPES = { '.mp3': 'audio/mpeg', '.wav': 'audio/wav', '.ogg': 'audio/ogg', '.gif': 'image/gif', '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.webp': 'image/webp', '.webm': 'video/webm', '.mp4': 'video/mp4' };
+const MEDIA_TYPES = { '.mp3': 'audio/mpeg', '.wav': 'audio/wav', '.ogg': 'audio/ogg', '.gif': 'image/gif', '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.webp': 'image/webp', '.webm': 'video/webm', '.mp4': 'video/mp4', '.json': 'application/json' }; // .json = animación Lottie
 const mediaName = n => { n = path.basename(String(n || '')).replace(/[^\w.\- ()áéíóúñÁÉÍÓÚÑ]/g, '_'); return MEDIA_TYPES[path.extname(n).toLowerCase()] ? n : null; };
 const listMedia = () => { try { return fs.readdirSync(MEDIA).filter(mediaName); } catch { return []; } };
 const saveCfg = () => { fs.writeFileSync(CFG + '.tmp', JSON.stringify(cfg, null, 2)); fs.renameSync(CFG + '.tmp', CFG); }; // escritura atómica
@@ -240,6 +240,10 @@ const server = http.createServer((req, res) => {
     if (!name || !fs.existsSync(path.join(MEDIA, name))) { res.statusCode = 404; return res.end(); }
     res.setHeader('content-type', MEDIA_TYPES[path.extname(name).toLowerCase()]);
     return fs.createReadStream(path.join(MEDIA, name)).pipe(res);
+  }
+  if (url === '/lib/lottie.js') { // reproductor de animaciones Lottie para las alertas (sin depender de internet)
+    res.setHeader('content-type', 'text/javascript'); res.setHeader('cache-control', 'max-age=86400');
+    return fs.createReadStream(path.join(__dirname, 'node_modules/lottie-web/build/player/lottie_light.min.js')).pipe(res);
   }
   if (url.startsWith('/auth/twitch')) return twitchAuthRoute(url, req, res);
   if (url === '/config') { res.setHeader('content-type', 'application/json'); return res.end(JSON.stringify(cfg)); }
