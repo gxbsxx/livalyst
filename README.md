@@ -11,8 +11,9 @@ Chat unificado, alertas y metas para OBS. Junta en un solo sitio el chat y los e
 
 ## Cómo se usa
 
-1. Instala [Node.js](https://nodejs.org) (versión LTS).
-2. Descarga este proyecto y haz doble clic en **Iniciar Livalyst.vbs**. La primera vez instala lo que necesita.
+1. Descarga **Livalyst.zip** de la sección *Releases*, descomprímelo donde quieras y abre **Livalyst.exe**. No hay que instalar nada.
+   (Si prefieres usar el código directamente: instala [Node.js](https://nodejs.org) y abre **Iniciar Livalyst.vbs**.)
+2. Para cerrarlo y volver a abrirlo, basta con abrir otra vez **Livalyst.exe**: cierra solo la copia anterior.
 3. En OBS:
    - Panel del chat: *Docks → Docks de navegador personalizados* con `http://localhost:8787`
    - Configurar widgets: abre `http://localhost:8787/widgets`
