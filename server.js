@@ -3,7 +3,7 @@
 const http = require('http'), fs = require('fs'), path = require('path');
 const WebSocket = require('ws');
 
-const VERSION = '1.31';
+const VERSION = '1.32';
 // Tus datos (configuración, cuenta de Twitch, metas, sonidos e imágenes) viven fuera de la carpeta de la app,
 // así cada versión nueva es una carpeta que se puede sustituir entera sin perder nada.
 const DATA = process.env.APPDATA ? path.join(process.env.APPDATA, 'Livalyst') : path.join(__dirname, 'datos');
@@ -188,7 +188,7 @@ const mediaName = n => { n = path.basename(String(n || '')).replace(/[^\w.\- ()�
 const listMedia = () => { try { return fs.readdirSync(MEDIA).filter(mediaName); } catch { return []; } };
 const saveCfg = () => { fs.writeFileSync(CFG + '.tmp', JSON.stringify(cfg, null, 2)); fs.renameSync(CFG + '.tmp', CFG); }; // escritura atómica
 const twitchChannel = () => cfg.twitch.trim().toLowerCase().replace(/.*twitch\.tv\//, '').replace(/^#/, '');
-const helix = path => fetch('https://api.twitch.tv/helix/' + path, { headers: { 'Client-Id': twAuth.client_id, Authorization: 'Bearer ' + twAuth.token } });
+const helix = (path, o = {}) => fetch('https://api.twitch.tv/helix/' + path, { ...o, headers: { 'Client-Id': twAuth.client_id, Authorization: 'Bearer ' + twAuth.token, 'Content-Type': 'application/json' } });
 const readBody = (req, max, cb) => { const bufs = []; let n = 0; req.on('data', c => { n += c.length; if (n > max) req.destroy(); else bufs.push(c); }); req.on('end', () => cb(Buffer.concat(bufs))); };
 
 const PAGES = { '/': 'panel.html', '/index.html': 'panel.html', '/widgets': 'widgets.html', '/alertas': 'overlay.html', '/meta': 'overlay.html' };
@@ -246,6 +246,7 @@ const server = http.createServer((req, res) => {
     return fs.createReadStream(path.join(__dirname, 'node_modules/lottie-web/build/player/lottie_light.min.js')).pipe(res);
   }
   if (url.startsWith('/auth/twitch')) return twitchAuthRoute(url, req, res);
+  if (url === '/stream' || url === '/stream/categories') return streamRoute(url, req, res);
   if (url === '/config') { res.setHeader('content-type', 'application/json'); return res.end(JSON.stringify(cfg)); }
   const lg = /^\/logos\/(twitch|youtube|tiktok|kick)$/.exec(url);
   if (lg) {
@@ -600,7 +601,7 @@ function reload() {
 // El chat de Twitch se lee sin cuenta; esto añade los eventos que Twitch solo da al dueño del canal.
 // El token se guarda en twitch-auth.json (nunca en config.json, que se envía al panel).
 const AUTH = path.join(DATA, 'twitch-auth.json');
-const TW_SCOPES = 'moderator:read:followers channel:read:redemptions channel:read:hype_train moderator:read:shoutouts bits:read moderator:read:chatters';
+const TW_SCOPES = 'moderator:read:followers channel:read:redemptions channel:read:hype_train moderator:read:shoutouts bits:read moderator:read:chatters channel:manage:broadcast';
 const REDIRECT = `http://localhost:${PORT}/auth/twitch`;
 let twAuth = null, twAuthState = { ok: false, msg: 'sin conectar' }, oauthState = null, esGen = 0, esWs = null;
 try { twAuth = JSON.parse(fs.readFileSync(AUTH, 'utf8')); } catch {}
@@ -682,6 +683,38 @@ else fetch('/auth/twitch/token', { method: 'POST', body: JSON.stringify({ token:
   .then(d => m.textContent = '✅ Cuenta conectada: ' + d.login + '. Ya puedes cerrar esta ventana.')
   .catch(t => m.textContent = 'No se pudo conectar: ' + (t || 'inténtalo otra vez desde el panel'));
 </script>`;
+// ---------- editar el directo de Twitch (título y categoría) con la API oficial ----------
+async function streamRoute(url, req, res) {
+  const json = (o, code = 200) => { res.statusCode = code; res.setHeader('content-type', 'application/json'); res.end(JSON.stringify(o)); };
+  if (!twAuth) return json({ need: 'login' });
+  try {
+    if (url === '/stream/categories') { // el mismo catálogo que usa Twitch en su panel de control
+      const q = (new URL(req.url, 'http://x').searchParams.get('q') || '').trim().slice(0, 100);
+      const d = q ? (await (await helix('search/categories?first=8&query=' + encodeURIComponent(q))).json()).data || [] : [];
+      return json(d.map(g => ({ id: g.id, name: g.name, box: g.box_art_url.replace(/\{width\}x\{height\}|\d+x\d+(?=\.\w+$)/, '52x72') })));
+    }
+    if (req.method === 'GET') {
+      const v = await validate(twAuth.token);
+      if (!v) return json({ need: 'login' });
+      if (!v.scopes.includes('channel:manage:broadcast')) return json({ need: 'scope' });
+      const c = (await (await helix('channels?broadcaster_id=' + twAuth.user_id)).json()).data?.[0];
+      return json({ title: c?.title || '', game: c?.game_id ? { id: c.game_id, name: c.game_name } : null });
+    }
+    if (req.method === 'POST') return readBody(req, 1e4, async b => {
+      let d; try { d = JSON.parse(b); } catch { return json({ error: 'Datos no válidos.' }, 400); }
+      const title = typeof d.title === 'string' ? d.title.trim() : '', game = d.game == null ? '' : String(d.game);
+      if (!title || title.length > 140) return json({ error: 'El título debe tener entre 1 y 140 caracteres.' }, 400);
+      if (game && !/^\d+$/.test(game)) return json({ error: 'Categoría no válida.' }, 400);
+      try {
+        const r = await helix('channels?broadcaster_id=' + twAuth.user_id, { method: 'PATCH', body: JSON.stringify({ title, ...(game && { game_id: game }) }) });
+        if (r.ok) return json({ ok: true });
+        const e = await r.json().catch(() => ({}));
+        json({ error: 'Twitch no lo ha aceptado: ' + (e.message || r.status) }, 400);
+      } catch { json({ error: 'No se pudo hablar con Twitch. ¿Hay conexión a internet?' }, 502); }
+    });
+  } catch { return json({ error: 'No se pudo hablar con Twitch. ¿Hay conexión a internet?' }, 502); }
+  res.statusCode = 405; res.end();
+}
 function twitchAuthRoute(url, req, res) {
   const page = (code, html) => { res.statusCode = code; res.setHeader('content-type', 'text/html; charset=utf-8'); res.end(html); };
   if (url === '/auth/twitch/start') {

@@ -166,11 +166,24 @@
   .btn { padding: 6px 12px; border-radius: 5px; border: 0; cursor: pointer; background: var(--line); color: #efeff1; }
   .btn.pri { background: var(--acc); color: #fff; }
   menu { display: flex; justify-content: flex-end; gap: 6px; padding: 0; margin: 10px 0 0; }
+  /* editar el directo */
+  #liveForm { display: grid; gap: 10px; }
+  #liveForm h2 { margin: 0; }
+  #liveForm label { gap: 4px; }
+  #liveForm input { padding: 7px 8px; }
+  .cnt { align-self: flex-end; font-size: 11px; color: var(--mut); }
+  #liveList { list-style: none; margin: 2px 0 0; padding: 4px; max-height: 236px; overflow: auto; border: 1px solid var(--line); border-radius: 6px; background: #0e0e10; }
+  #liveList li { display: flex; align-items: center; gap: 8px; padding: 4px 6px; border-radius: 4px; color: #efeff1; cursor: pointer; }
+  #liveList li:hover, #liveList li[aria-selected=true] { background: var(--line); }
+  #liveList img { width: 26px; height: 36px; border-radius: 3px; object-fit: cover; flex: none; }
+  #liveMsg:empty { display: none; }
+  #liveMsg.ok { color: #53fc18; } #liveMsg.bad { color: #ff6b81; }
 </style>
 <body>
 <header id="head">
   <span id="st"></span><span id="views"></span>
   <span class="tools">
+    <button id="liveBtn" title="Editar el título y la categoría del directo de Twitch">✏️</button>
     <button id="testBtn" title="Enviar mensajes de prueba">🧪</button>
     <button id="clearBtn" title="Vaciar el chat (solo aquí)">🧹</button>
     <button id="gear" title="Ajustes">⚙</button>
@@ -182,6 +195,21 @@
 <div id="chatbar" class="secbar">💬 Chat</div>
 <main><div id="chat"><div id="empty">Esperando mensajes…<br>Pulsa 🧪 para ver cómo queda.</div></div><button id="more"></button></main>
 <div id="join"></div>
+
+<dialog id="live">
+  <form method="dialog" id="liveForm">
+    <h2>✏️ Editar el directo de Twitch</h2>
+    <div id="liveNeed" hidden><p class="hint" id="liveNeedText" style="font-size:12px;margin-bottom:8px"></p><button type="button" class="btn pri" id="liveConnect"></button></div>
+    <div id="liveEdit" style="display:grid;gap:10px">
+      <label>Título<input type="text" id="liveTitle" maxlength="140" autocomplete="off"><span class="cnt" id="liveCnt"></span></label>
+      <label>Categoría<input type="text" id="liveCat" role="combobox" aria-expanded="false" aria-controls="liveList" aria-autocomplete="list" autocomplete="off" placeholder="Escribe para buscar…"></label>
+      <ul id="liveList" role="listbox" aria-label="Categorías de Twitch" hidden></ul>
+      <p class="hint">TikTok no deja cambiar el título ni la categoría desde fuera de su aplicación: hazlo en TikTok LIVE Studio o en el móvil.</p>
+    </div>
+    <p class="hint" id="liveMsg" role="status" style="font-size:12px"></p>
+    <menu style="margin:0"><button class="btn" value="close">Cerrar</button><button type="button" class="btn pri" id="liveSave">Guardar en Twitch</button></menu>
+  </form>
+</dialog>
 
 <dialog id="dlg">
   <form method="dialog" id="form">
@@ -582,6 +610,68 @@ form.addEventListener('keydown', e => { // Intro en un campo no cierra el diálo
 });
 buildLookFields();
 $('gear').onclick = () => { if (cfg) { fill(); dlg.showModal(); } };
+
+// ---------- editar el directo de Twitch: título y categoría (catálogo oficial de Twitch) ----------
+let liveGame = null, liveOpts = [], liveAct = -1, liveTimer, liveSeq = 0;
+const liveMsg = (t, cls = '') => { $('liveMsg').textContent = t; $('liveMsg').className = 'hint ' + cls; };
+const liveCount = () => ($('liveCnt').textContent = $('liveTitle').value.length + ' / 140');
+$('liveTitle').oninput = liveCount;
+$('liveBtn').onclick = async () => {
+  liveMsg('Cargando…'); $('liveNeed').hidden = $('liveEdit').hidden = true; $('liveSave').hidden = true; showCats([]);
+  $('live').showModal();
+  const d = await fetch('/stream').then(r => r.json()).catch(() => ({ error: 'No se pudo hablar con Livalyst.' }));
+  liveMsg(d.error || '', 'bad');
+  if (d.need) {
+    $('liveNeed').hidden = false; $('liveConnect').dataset.need = d.need;
+    $('liveNeedText').textContent = d.need === 'scope' ? 'Para cambiar el título y la categoría, Twitch pide un permiso más. Vuelve a conectar tu cuenta (solo esta vez).' : 'Primero conecta tu cuenta de Twitch en ⚙ Ajustes → «Cuenta de Twitch».';
+    $('liveConnect').textContent = d.need === 'scope' ? 'Volver a conectar la cuenta' : 'Abrir los ajustes';
+  } else if (!d.error) {
+    $('liveEdit').hidden = false; $('liveSave').hidden = false;
+    $('liveTitle').value = d.title; liveGame = d.game; $('liveCat').value = d.game?.name || ''; liveCount(); $('liveTitle').focus();
+  }
+};
+$('liveConnect').onclick = () => {
+  if ($('liveConnect').dataset.need === 'scope') { window.open('/auth/twitch/start', 'twitch', 'width=520,height=760'); liveMsg('Cuando Twitch diga «Cuenta conectada», cierra esa ventana y vuelve a pulsar ✏️.'); }
+  else { $('live').close(); $('gear').click(); $('twAcc').open = true; }
+};
+function showCats(list) {
+  liveOpts = list; liveAct = -1;
+  $('liveList').replaceChildren(...list.map((g, i) => {
+    const li = document.createElement('li'), img = document.createElement('img'), name = document.createElement('span');
+    li.role = 'option'; li.id = 'cat' + i; img.src = g.box; img.alt = ''; name.textContent = g.name; li.append(img, name);
+    li.onmousedown = e => { e.preventDefault(); pickCat(g); };
+    return li;
+  }));
+  $('liveList').hidden = !list.length; $('liveCat').setAttribute('aria-expanded', !!list.length);
+}
+function pickCat(g) { liveGame = g; $('liveCat').value = g.name; showCats([]); }
+function markCat(i) {
+  liveAct = (i + liveOpts.length) % liveOpts.length;
+  [...$('liveList').children].forEach((li, n) => li.setAttribute('aria-selected', n === liveAct));
+  $('liveList').children[liveAct].scrollIntoView({ block: 'nearest' }); $('liveCat').setAttribute('aria-activedescendant', 'cat' + liveAct);
+}
+$('liveCat').oninput = () => { // busca mientras escribes (espera un momento para no preguntar a Twitch por cada letra)
+  liveGame = null; clearTimeout(liveTimer);
+  const q = $('liveCat').value.trim(), my = ++liveSeq;
+  if (!q) return showCats([]);
+  liveTimer = setTimeout(async () => { const list = await fetch('/stream/categories?q=' + encodeURIComponent(q)).then(r => r.json()).catch(() => []); if (my === liveSeq && Array.isArray(list)) showCats(list); }, 200);
+};
+$('liveCat').onkeydown = e => {
+  if (!liveOpts.length) return;
+  if (e.key === 'ArrowDown' || e.key === 'ArrowUp') { e.preventDefault(); markCat(liveAct + (e.key === 'ArrowDown' ? 1 : -1)); }
+  else if (e.key === 'Enter') { e.preventDefault(); pickCat(liveOpts[Math.max(liveAct, 0)]); }
+  else if (e.key === 'Escape') { e.preventDefault(); showCats([]); }
+};
+$('liveCat').onblur = () => setTimeout(() => showCats([]), 150);
+$('liveForm').onkeydown = e => { if (e.key === 'Enter' && e.target === $('liveTitle')) { e.preventDefault(); $('liveSave').click(); } };
+$('liveSave').onclick = async () => {
+  const cat = $('liveCat').value.trim();
+  if (cat && !liveGame) liveGame = liveOpts.find(g => g.name.toLowerCase() === cat.toLowerCase()) || null;
+  if (cat && !liveGame) return liveMsg('Elige la categoría de la lista que aparece al escribir.', 'bad');
+  liveMsg('Guardando…');
+  const r = await fetch('/stream', { method: 'POST', body: JSON.stringify({ title: $('liveTitle').value, game: liveGame?.id }) }).then(r => r.json()).catch(() => ({ error: 'No se pudo hablar con Livalyst.' }));
+  if (r.ok) { liveMsg('✓ Guardado en Twitch', 'ok'); setTimeout(() => $('live').close(), 1000); } else liveMsg(r.error || 'No se pudo guardar.', 'bad');
+};
 </script>
 </body>
 </html>
