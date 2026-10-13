@@ -26,16 +26,16 @@ jobs:
         run: |
           W=$(pwd)  # rutas relativas: node, csc y bash las entienden igual en Windows
           set -E; exec > >(tee ../registro.txt) 2>&1  # si algo falla, sus últimas líneas salen como aviso en GitHub
-          trap 'tail -n 12 ../registro.txt | sed "s/^/::error::/"; echo "::error::Falló: $BASH_COMMAND"' ERR
+          trap 'tail -n 6 ../registro.txt | sed "s/^/::error::/"; echo "::error::Falló: $BASH_COMMAND"' ERR
           curl -sSfL -o ../rcedit.exe https://github.com/electron/rcedit/releases/download/v2.0.0/rcedit-x64.exe
-          CSC=/c/Windows/Microsoft.NET/Framework64/v4.0.30319/csc.exe
           publicar() { # commit, versión, título, notas
+            if gh release view "v$2.0" > /dev/null 2>&1; then echo "v$2.0 ya está"; return; fi
             cd "$W" && rm -rf ../src ../dist && T=$(git rev-parse "$1") && git worktree add -f ../src "$T" && cd ../src
             sed -i -E "s/const VERSION = '[^']*'/const VERSION = '$2'/" server.js
             sed -i -E "0,/\"version\": \"[^\"]*\"/s//\"version\": \"$2.0\"/" package.json
             cp ../rcedit.exe build/rcedit.exe
             node build/make-exe.js ../dist/Livalyst
-            if [ -f build/bandeja.cs ]; then "$CSC" -nologo -target:winexe -codepage:65001 -win32icon:build/bandeja.ico -out:../dist/Livalyst/LivalystBandeja.exe build/bandeja.cs; fi
+            if [ -f build/bandeja.cs ]; then pwsh -c '& "$env:WINDIR\Microsoft.NET\Framework64\v4.0.30319\csc.exe" /nologo /target:winexe /codepage:65001 /win32icon:build\bandeja.ico /out:..\dist\Livalyst\LivalystBandeja.exe build\bandeja.cs; exit $LASTEXITCODE'; fi
             cp server.js panel.html widgets.html overlay.html package.json package-lock.json ../dist/Livalyst/
             cp -r logos ../dist/Livalyst/
             (cd ../dist/Livalyst && npm ci --omit=dev --silent)
