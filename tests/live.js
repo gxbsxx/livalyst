@@ -32,6 +32,8 @@ const { chromium } = require('playwright'); const assert = require('assert');
   saved = null; await p.click('#liveBtn'); await p.waitForTimeout(300);
   await p.fill('#liveCat', 'algo que no existe'); await p.waitForTimeout(400); await p.click('#liveSave'); await p.waitForTimeout(200);
   assert.strictEqual(saved, null); assert.match(await p.textContent('#liveMsg'), /Elige la categoría/);
+  await p.context().route('https://livecenter.tiktok.com/**', r => r.fulfill({ body: 'ok' })); // botón de TikTok: abre su web oficial
+  const [pop] = await Promise.all([p.waitForEvent('popup'), p.click('#tkOpen')]); assert.match(pop.url(), /livecenter\.tiktok\.com\/live_monitor/); await pop.close();
   console.log({ guardado: true, errores: errs }); assert.strictEqual(errs.length, 0);
   await b.close();
 })().catch(e => { console.error('FALLO', e.message); process.exit(1); });

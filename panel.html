@@ -177,6 +177,9 @@
   #liveList li:hover, #liveList li[aria-selected=true] { background: var(--line); }
   #liveList img { width: 26px; height: 36px; border-radius: 3px; object-fit: cover; flex: none; }
   #liveMsg:empty { display: none; }
+  .tkrow { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; padding: 8px 10px; border-radius: 8px; background: #0e0e10; font-size: 12px; color: var(--mut); }
+  #tkOpen { border: 1px solid #25f4ee; background: none; color: #25f4ee; }
+  #tkOpen:hover { background: #25f4ee; color: #000; }
   #liveMsg.ok { color: #53fc18; } #liveMsg.bad { color: #ff6b81; }
 </style>
 <body>
@@ -198,14 +201,14 @@
 
 <dialog id="live">
   <form method="dialog" id="liveForm">
-    <h2>✏️ Editar el directo de Twitch</h2>
+    <h2>✏️ Editar el directo</h2>
     <div id="liveNeed" hidden><p class="hint" id="liveNeedText" style="font-size:12px;margin-bottom:8px"></p><button type="button" class="btn pri" id="liveConnect"></button></div>
     <div id="liveEdit" style="display:grid;gap:10px">
-      <label>Título<input type="text" id="liveTitle" maxlength="140" autocomplete="off"><span class="cnt" id="liveCnt"></span></label>
-      <label>Categoría<input type="text" id="liveCat" role="combobox" aria-expanded="false" aria-controls="liveList" aria-autocomplete="list" autocomplete="off" placeholder="Escribe para buscar…"></label>
+      <label>Título en Twitch<input type="text" id="liveTitle" maxlength="140" autocomplete="off"><span class="cnt" id="liveCnt"></span></label>
+      <label>Categoría en Twitch<input type="text" id="liveCat" role="combobox" aria-expanded="false" aria-controls="liveList" aria-autocomplete="list" autocomplete="off" placeholder="Escribe para buscar…"></label>
       <ul id="liveList" role="listbox" aria-label="Categorías de Twitch" hidden></ul>
-      <p class="hint">TikTok no deja cambiar el título ni la categoría desde fuera de su aplicación: hazlo en TikTok LIVE Studio o en el móvil.</p>
     </div>
+    <div class="tkrow"><span>🎵 En TikTok se cambia en su web oficial.</span><button type="button" class="btn" id="tkOpen">Abrir TikTok LIVE Monitor</button></div>
     <p class="hint" id="liveMsg" role="status" style="font-size:12px"></p>
     <menu style="margin:0"><button class="btn" value="close">Cerrar</button><button type="button" class="btn pri" id="liveSave">Guardar en Twitch</button></menu>
   </form>
@@ -630,6 +633,7 @@ $('liveBtn').onclick = async () => {
     $('liveTitle').value = d.title; liveGame = d.game; $('liveCat').value = d.game?.name || ''; liveCount(); $('liveTitle').focus();
   }
 };
+$('tkOpen').onclick = () => window.open('https://livecenter.tiktok.com/live_monitor?apply_mode=11', 'tiktok', 'width=1200,height=820');
 $('liveConnect').onclick = () => {
   if ($('liveConnect').dataset.need === 'scope') { window.open('/auth/twitch/start', 'twitch', 'width=520,height=760'); liveMsg('Cuando Twitch diga «Cuenta conectada», cierra esa ventana y vuelve a pulsar ✏️.'); }
   else { $('live').close(); $('gear').click(); $('twAcc').open = true; }
