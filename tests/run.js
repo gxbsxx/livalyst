@@ -11,7 +11,7 @@ setTimeout(() => {
   for (const t of TESTS) {
     process.stdout.write(`\n▶ ${t}\n`);
     try { execFileSync(process.execPath, [t + '.js'], { cwd: __dirname, stdio: 'inherit', timeout: 180e3 }); }
-    catch (e) { failed.push(t); console.log(`  ↳ ${t} terminó con código ${e.status} y señal ${e.signal}`); }
+    catch (e) { failed.push(t); console.log(`  ↳ ${t} terminó con código ${e.status}, señal ${e.signal}: ${e.code || ''} ${e.message}`); }
   }
   server.kill();
   console.log(failed.length ? `\n✖ Fallan: ${failed.join(', ')}` : '\n✔ Todas las pruebas pasan');
