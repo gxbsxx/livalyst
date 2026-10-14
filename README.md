@@ -38,6 +38,12 @@ Tus ajustes se guardan aparte (en `%APPDATA%\Livalyst`), así que actualizar la 
 
 Haz doble clic en **Comprobar Livalyst.bat**, en la carpeta del programa. Revisa los archivos, abre Livalyst si está cerrado y comprueba que arranca y que todas sus páginas responden. Al final dice «Todo funciona correctamente» o qué falla.
 
+## Apoya el proyecto
+
+Livalyst es gratis y lo seguirá siendo. Si te ayuda en tus directos y quieres invitarme a un café, puedes hacerlo en Ko-fi:
+
+[![Apoya Livalyst en Ko-fi](https://img.shields.io/badge/Ko--fi-Apoya%20Livalyst-FF5E5B?logo=ko-fi&logoColor=white)](https://ko-fi.com/gxbsxx)
+
 ## Licencia
 
 MIT. Puedes usarlo, cambiarlo y compartirlo libremente.
