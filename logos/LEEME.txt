@@ -1,7 +1,7 @@
-Pon aqui los logos con estos nombres (png, svg, webp, jpg o ico):
-  twitch.png   tiktok.png   youtube.png   kick.png
+Logos de cada plataforma (png, svg, webp, jpg o ico):
+  twitch.png   tiktok.png   youtube.svg   kick.svg
 Si falta alguno, ese chat sigue mostrando la etiqueta de texto (TW, TT...).
 
-Descargalos de las paginas oficiales de marca:
-  Twitch: https://brand.twitch.com
-  TikTok: https://www.tiktok.com/brand
+Twitch y TikTok vienen de sus páginas oficiales de marca (brand.twitch.com y tiktok.com/brand).
+YouTube y Kick vienen de Simple Icons (simpleicons.org), con sus colores oficiales.
+Son marcas de sus dueños; aquí solo indican de qué plataforma viene cada mensaje.
