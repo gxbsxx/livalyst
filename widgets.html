@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Livalyst – Widgets</title>
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='116' fill='%23fe2c55'/%3E%3Cpath d='M120 170a50 50 0 0 1 50-50h172a50 50 0 0 1 50 50v112a50 50 0 0 1-50 50h-96l-74 62v-62h-2a50 50 0 0 1-50-50z' fill='%23fff'/%3E%3Crect x='196' y='176' width='40' height='108' rx='20' fill='%23fe2c55'/%3E%3Crect x='196' y='244' width='96' height='40' rx='20' fill='%23fe2c55'/%3E%3C/svg%3E">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='128' fill='%23f2efe9'/%3E%3Crect x='76' y='120' width='190' height='272' rx='48' fill='%2315132a'/%3E%3Cpath d='M128.3 330V178.2H165.4V330ZM135 330V298.9H227.2V330Z' fill='%23f2efe9'/%3E%3Cpath d='M298 160h96a48 48 0 0 1 48 48v84a48 48 0 0 1-48 48h-46l-44 38v-38h-6a48 48 0 0 1-48-48v-84a48 48 0 0 1 48-48z' fill='%23fe2c55'/%3E%3Cpath d='M327 302 297.6 212.4H328.1L345.1 280.6H348L365.3 212.4H394.4L364.8 302Z' fill='%23f2efe9'/%3E%3C/svg%3E">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&display=swap">
 <style>
   :root { --ink: #15132a; --panel: #1e1b36; --raise: #26224a; --line: #2f2a4d; --text: #eeeaff; --mut: #a49cc8;
@@ -26,7 +26,7 @@
   h1 svg { width: 34px; height: 34px; flex: none; transition: transform .4s var(--ease); }
   h1:hover svg { transform: rotate(-6deg) scale(1.06); }
   h1 .wm { font-weight: inherit; }
-  h1 .wm span { color: var(--pink); text-shadow: -1px 0 var(--cyan); }
+  h1 .wm span { color: var(--pink); } /* el punto rojo de «en directo» */
   .sub { color: var(--mut); font: 600 15px var(--head); }
   header a { padding: 5px 12px; border: 1px solid var(--line); border-radius: 99px; font-size: 12px; text-decoration: none; transition: border-color .2s; }
   header a:hover { border-color: var(--cyan); }
@@ -124,7 +124,7 @@
 </head>
 <body class="loading still">
 <header>
-  <h1><svg viewBox="0 0 512 512" aria-hidden="true"><defs><linearGradient id="lg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fe2c55"/><stop offset="1" stop-color="#b8114a"/></linearGradient></defs><rect width="512" height="512" rx="116" fill="url(#lg)"/><path d="M120 170 a50 50 0 0 1 50 -50 h172 a50 50 0 0 1 50 50 v112 a50 50 0 0 1 -50 50 h-96 l-74 62 v-62 h-2 a50 50 0 0 1 -50 -50z" fill="#fff"/><rect x="196" y="176" width="40" height="108" rx="20" fill="#fe2c55"/><rect x="196" y="244" width="96" height="40" rx="20" fill="#fe2c55"/><circle cx="392" cy="368" r="40" fill="#15132a"/><circle cx="392" cy="368" r="20" fill="#25f4ee"/></svg><b class="wm">Liv<span>alyst</span></b></h1>
+  <h1><svg viewBox="0 0 512 512" aria-hidden="true"><rect width="512" height="512" rx="128" fill="#f2efe9"/><rect x="76" y="120" width="190" height="272" rx="48" fill="#15132a"/><path d="M128.3 330V178.2H165.4V330ZM135 330V298.9H227.2V330Z" fill="#f2efe9"/><path d="M298 160h96a48 48 0 0 1 48 48v84a48 48 0 0 1-48 48h-46l-44 38v-38h-6a48 48 0 0 1-48-48v-84a48 48 0 0 1 48-48z" fill="#fe2c55"/><path d="M327 302 297.6 212.4H328.1L345.1 280.6H348L365.3 212.4H394.4L364.8 302Z" fill="#f2efe9"/></svg><b class="wm">Livalyst<span>.</span></b></h1>
   <span class="sub">Widgets para OBS</span>
   <a href="/">← Volver al chat</a>
   <span id="saved" role="status">Los cambios se guardan solos</span>
