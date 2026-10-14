@@ -614,6 +614,10 @@ function reload() {
 const AUTH = path.join(DATA, 'twitch-auth.json');
 const TW_SCOPES = 'moderator:read:followers channel:read:redemptions channel:read:hype_train moderator:read:shoutouts bits:read moderator:read:chatters channel:manage:broadcast';
 const REDIRECT = `http://localhost:${PORT}/auth/twitch`;
+// Aplicación «Livalyst» registrada en Twitch: así nadie tiene que crear la suya. Un Client ID no es secreto
+// (va en cada petición) y el inicio de sesión de Twitch no usa contraseña de aplicación. Quien quiera, pone la suya en Ajustes.
+const TW_CLIENT_ID = '1ip0rzpi2cco4r05zimeq9zai1uj39';
+const twClientId = () => cfg.twitchClientId.trim() || TW_CLIENT_ID;
 let twAuth = null, twAuthState = { ok: false, msg: 'sin conectar' }, oauthState = null, esGen = 0, esWs = null;
 try { twAuth = JSON.parse(fs.readFileSync(AUTH, 'utf8')); } catch {}
 
@@ -729,8 +733,8 @@ async function streamRoute(url, req, res) {
 function twitchAuthRoute(url, req, res) {
   const page = (code, html) => { res.statusCode = code; res.setHeader('content-type', 'text/html; charset=utf-8'); res.end(html); };
   if (url === '/auth/twitch/start') {
-    const id = cfg.twitchClientId.trim();
-    if (!/^[a-z0-9]{20,40}$/.test(id)) return page(400, '<p style="font:16px system-ui">Primero pega el Client ID de tu aplicación de Twitch en los ajustes del panel.</p>');
+    const id = twClientId();
+    if (!/^[a-z0-9]{20,40}$/.test(id)) return page(400, '<p style="font:16px system-ui">El Client ID de Twitch de los ajustes no es válido: bórralo para usar el de Livalyst.</p>');
     oauthState = require('crypto').randomBytes(16).toString('hex');
     res.statusCode = 302;
     res.setHeader('location', 'https://id.twitch.tv/oauth2/authorize?' + new URLSearchParams({ response_type: 'token', client_id: id, redirect_uri: REDIRECT, scope: TW_SCOPES, state: oauthState, force_verify: 'true' }));
@@ -744,7 +748,7 @@ function twitchAuthRoute(url, req, res) {
         if (!oauthState || state !== oauthState) throw 'la petición ha caducado, vuelve a pulsar «Conectar» en el panel';
         oauthState = null;
         const v = await validate(token);
-        if (!v || v.client_id !== cfg.twitchClientId.trim()) throw 'Twitch no ha aceptado la conexión';
+        if (!v || v.client_id !== twClientId()) throw 'Twitch no ha aceptado la conexión';
         twAuth = { token, login: v.login, user_id: v.user_id, client_id: v.client_id }; twChattersOk = null;
         fs.writeFileSync(AUTH, JSON.stringify(twAuth));
         startEventSub();

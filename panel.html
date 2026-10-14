@@ -244,17 +244,13 @@
     <details id="twAcc"><summary>Cuenta de Twitch (follows, canjes, hype train…)</summary><div>
       <p class="hint">Para leer el chat no hace falta, pero Twitch solo da los follows, canjes de puntos, hype trains, shoutouts y power-ups al dueño del canal.</p>
       <p class="wide" id="twState">Estado: …</p>
-      <label class="wide">Client ID de tu aplicación de Twitch<input type="text" data-k="twitchClientId" placeholder="pega aquí el Client ID" autocomplete="off"></label>
       <button type="button" class="btn pri" id="twLogin">Conectar cuenta</button>
       <button type="button" class="btn" id="twLogout">Desconectar</button>
-      <p class="hint">Si el botón no abre nada, abre en tu navegador <b>http://localhost:8787/auth/twitch/start</b></p>
-      <details class="wide"><summary>Cómo conseguir el Client ID (una sola vez)</summary><ol class="hint" style="padding-left:18px">
-        <li>Entra en <b>dev.twitch.tv/console/apps</b> con tu cuenta (necesitas tener activada la verificación en dos pasos).</li>
-        <li>Pulsa «Registrar tu aplicación». Nombre: el que quieras (p. ej. Livalyst-tuNombre).</li>
-        <li>URL de redireccionamiento OAuth: <b>http://localhost:8787/auth/twitch</b></li>
-        <li>Categoría: «Chat Bot». Tipo de cliente: «Público».</li>
-        <li>Crea la aplicación, pulsa «Administrar» y copia el <b>ID de cliente</b> aquí arriba.</li>
-      </ol></details>
+      <p class="hint">Se abre Twitch: inicia sesión y pulsa «Autorizar». Si el botón no abre nada, abre en tu navegador <b>http://localhost:8787/auth/twitch/start</b></p>
+      <details class="wide"><summary>Avanzado: usar tu propia aplicación de Twitch</summary><div style="display:grid;gap:6px">
+        <p class="hint">No hace falta: Livalyst ya trae la suya. Solo si prefieres la tuya, crea una en <b>dev.twitch.tv/console/apps</b> (URL de redireccionamiento: <b>http://localhost:8787/auth/twitch</b>, tipo de cliente «Público») y pega aquí su ID de cliente. Déjalo vacío para usar la de Livalyst.</p>
+        <label>Client ID de tu aplicación<input type="text" data-k="twitchClientId" placeholder="vacío = el de Livalyst" autocomplete="off"></label>
+      </div></details>
     </div></details>
     <details><summary>Apariencia</summary><div data-look="dock"></div></details>
     <details><summary>Filtros y resaltados</summary><div>
