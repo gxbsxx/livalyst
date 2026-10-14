@@ -33,7 +33,7 @@ Haz doble clic en **Comprobar Livalyst.bat**, en la carpeta del programa. Revisa
 
 Livalyst es gratis y lo seguirá siendo. Si te ayuda en tus directos y quieres invitarme a un gofre, puedes hacerlo en Ko-fi:
 
-[![Apoya Livalyst en Ko-fi](https://img.shields.io/badge/Ko--fi-Apoya%20Livalyst-FF5E5B?logo=ko-fi&logoColor=white)](https://ko-fi.com/gxbsxx)
+[![Apoya Livalyst en Ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/gxbsxx)
 
 ## Licencia
 
