@@ -29,6 +29,7 @@ function WIDGETS_DEFAULT() {
     style: { theme: 'custom', twitch: false, fxOn: true, fx: 'theme', font: 'Roboto', size: 34, color: '#ffffff', accent: '#fe2c55', anim: 'pop' },
     goals: { likes: goal('Meta de likes', 10000, '#fe2c55'), follows: goal('Meta de seguidores', 50, '#25f4ee'),
       diamonds: goal('Meta de monedas', 1000, '#ffc400'), shares: goal('Meta de compartidos', 20, '#8be04e') },
+    soundsV: 1, // sonidos de serie ya repartidos (ver «Una sola vez» más abajo)
     goalStyle: { theme: 'custom', fxOn: true, fx: 'theme', font: 'Roboto', size: 22, text: '#ffffff', bg: '#000000', bgAlpha: 55 },
     top: { title: 'Top regaladores', count: 3 }, // ranking de quien más monedas ha dado en el directo (usa el aspecto de las metas)
   };
@@ -187,6 +188,11 @@ const MEDIA_TYPES = { '.mp3': 'audio/mpeg', '.wav': 'audio/wav', '.ogg': 'audio/
 const mediaName = n => { n = path.basename(String(n || '')).replace(/[^\w.\- ()áéíóúñÁÉÍÓÚÑ]/g, '_'); return MEDIA_TYPES[path.extname(n).toLowerCase()] ? n : null; };
 const listMedia = () => { try { return fs.readdirSync(MEDIA).filter(mediaName); } catch { return []; } };
 const saveCfg = () => { fs.writeFileSync(CFG + '.tmp', JSON.stringify(cfg, null, 2)); fs.renameSync(CFG + '.tmp', CFG); }; // escritura atómica
+// Una sola vez: las alertas que estaban sin sonido reciben el de serie; después se respeta lo que elijas (también «ninguno»)
+if (saved.widgets && !saved.widgets.soundsV) {
+  for (const [k, a] of Object.entries(cfg.widgets.alerts)) if (!a.sound) a.sound = DEFAULT.widgets.alerts[k].sound;
+  try { saveCfg(); } catch {}
+}
 const twitchChannel = () => cfg.twitch.trim().toLowerCase().replace(/.*twitch\.tv\//, '').replace(/^#/, '');
 const helix = (path, o = {}) => fetch('https://api.twitch.tv/helix/' + path, { ...o, headers: { 'Client-Id': twAuth.client_id, Authorization: 'Bearer ' + twAuth.token, 'Content-Type': 'application/json' } });
 const readBody = (req, max, cb) => { const bufs = []; let n = 0; req.on('data', c => { n += c.length; if (n > max) req.destroy(); else bufs.push(c); }); req.on('end', () => cb(Buffer.concat(bufs))); };
