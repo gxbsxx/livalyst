@@ -166,14 +166,29 @@ const history = [], events = []; // chat y eventos van separados: un mensaje de 
 // Contadores de las metas. Se guardan en disco para que sobrevivan a un reinicio en mitad del directo
 // y se ponen a cero solo cuando TikTok da otra sala (= directo nuevo).
 const STATS = path.join(DATA, 'stats.json');
-let stats = { room: '', likes: 0, follows: 0, diamonds: 0, shares: 0, top: {} }, statsTimer, statsSend;
+// test: lo que han sumado los botones «Probar» de /widgets, para poder quitarlo con «Quitar las pruebas»
+let stats = { room: '', likes: 0, follows: 0, diamonds: 0, shares: 0, top: {}, test: {} }, statsTimer, statsSend;
 try { Object.assign(stats, JSON.parse(fs.readFileSync(STATS, 'utf8'))); } catch {}
 function bump(k, v, absolute) {
   stats[k] = absolute ? v : stats[k] + v;
   statsSend ??= setTimeout(() => { statsSend = null; send({ stats }); }, 200); // los likes llegan a decenas por segundo
   clearTimeout(statsTimer); statsTimer = setTimeout(() => { try { fs.writeFileSync(STATS, JSON.stringify(stats)); } catch {} }, 2000); // los likes llegan a ráfagas
 }
-function resetStats(room = stats.room) { stats = { room, likes: 0, follows: 0, diamonds: 0, shares: 0, top: {} }; bump('likes', 0); }
+function resetStats(room = stats.room) { stats = { room, likes: 0, follows: 0, diamonds: 0, shares: 0, top: {}, test: {} }; bump('likes', 0); }
+// Las pruebas suman a las metas y al ranking (como en un directo) y se pueden quitar sin tocar lo real
+const TEST_LOGIN = '~prueba'; // un usuario de TikTok no puede llevar «~»: nunca choca con uno real
+const TEST_SUMS = { gift: ['diamonds', 5], follow: ['follows', 1], share: ['shares', 1] };
+function testSum(ev) {
+  const [k, v] = TEST_SUMS[ev] || []; if (!k) return;
+  stats.test[k] = (stats.test[k] || 0) + v;
+  if (ev === 'gift') addTop(stats.top, TEST_LOGIN, 'Prueba', v);
+  bump(k, v);
+}
+function testUndo() {
+  for (const [k, v] of Object.entries(stats.test)) stats[k] = Math.max(0, stats[k] - v);
+  delete stats.top[TEST_LOGIN]; stats.test = {};
+  bump('likes', 0);
+}
 // Ranking del directo: { login: { u: nombre, d: monedas } }. Se guardan los 30 mejores (el widget enseña como mucho 10).
 function addTop(t, login, user, diamonds) {
   if (!login || !diamonds) return;
@@ -225,11 +240,13 @@ const server = http.createServer((req, res) => {
       send({ cfg }); res.setHeader('content-type', 'application/json'); res.end(JSON.stringify(cfg.widgets));
     } catch { res.statusCode = 400; res.end('config no válida'); }
   });
-  if (url === '/test-alert' && req.method === 'POST') { // no cuenta para las metas ni sale en el chat
+  if (url === '/test-alert' && req.method === 'POST') { // sale en las alertas y suma a las metas y al ranking (no en el chat)
     const ev = new URLSearchParams(req.url.split('?')[1]).get('ev');
     send({ alertTest: { p: 'tiktok', ev, user: 'Prueba', id: 't' + Date.now(), gift: 'Rosa', n: 5, diamonds: 5 } });
+    testSum(ev);
     return res.end('ok');
   }
+  if (url === '/test/undo' && req.method === 'POST') { testUndo(); return res.end('ok'); }
   if (url === '/stats/reset' && req.method === 'POST') { resetStats(); return res.end('ok'); }
   if (url === '/room/clear' && req.method === 'POST') { room.clear(); roomDirty = true; return res.end('ok'); } // vuelven a salir en cuanto den señales
   if (url === '/media' && req.method === 'POST') {

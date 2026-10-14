@@ -117,6 +117,8 @@
   .chips { display: flex; flex-wrap: wrap; gap: 6px; }
   .chips span { padding: 3px 10px; border: 1px solid var(--line); border-radius: 99px; background: var(--ink); color: var(--text); }
   .url input { text-overflow: ellipsis; }
+  #undoTests { width: 100%; background: none; color: var(--mut); }
+  #undoTests:hover { color: var(--text); }
   .tests button:first-child { background: var(--pink); border-color: var(--pink); }
 </style>
 </head>
@@ -188,7 +190,8 @@
       <button data-test="gift">🎁 Probar regalo</button><button data-test="follow">💖 Seguidor</button>
       <button data-test="sub">⭐ Suscripción</button><button data-test="share">🔁 Compartir</button>
     </div>
-    <p class="hint" style="margin:0">«De cerca» enseña los widgets grandes para ver el diseño; «Horizontal» y «Vertical», a su tamaño real dentro del lienzo de OBS. Las barras salen al 60 % para que veas el diseño. «Probar» también lo enseña en OBS; no cuenta para las metas.</p>
+    <button id="undoTests" title="Resta de las metas y del ranking lo que han sumado las pruebas (no toca lo real)">↩️ Quitar las pruebas de las metas y el ranking</button>
+    <p class="hint" style="margin:0">«De cerca» enseña los widgets grandes para ver el diseño; «Horizontal» y «Vertical», a su tamaño real dentro del lienzo de OBS. Las metas y el ranking muestran los valores de verdad. «Probar» lo enseña también en OBS y suma a las metas y al ranking; «Quitar las pruebas» lo deja todo como estaba.</p>
   </aside>
 </main>
 
@@ -314,10 +317,9 @@ function buildScene() {
     mk('iframe', { src, title, style: `left:${x}px;top:${y}px;width:${w}px;height:${h}px` })];
   cv.style.cssText = `width:${c.w}px;height:${c.h}px`;
   cv.replaceChildren(...frame('/alertas', ...c.alert, 800, 600, 'Vista previa de alertas'),
-    ...Object.keys(GOALS).flatMap((k, i) => frame(`/meta?t=${k}&demo`, ...c.goal(i), 600, 120, 'Vista previa de la meta ' + k)),
-    ...frame('/meta?t=top&demo', ...c.top, 600, 260, 'Vista previa del ranking'));
+    ...Object.keys(GOALS).flatMap((k, i) => frame(`/meta?t=${k}`, ...c.goal(i), 600, 120, 'Vista previa de la meta ' + k)),
+    ...frame('/meta?t=top', ...c.top, 600, 260, 'Vista previa del ranking'));
   const ap = cv.querySelector('iframe'); ap.id = 'aprev';
-  ap.onload = () => setTimeout(preview, 800); // que la vista previa no salga vacía al abrir la página
   fitScene();
 }
 function fitScene() {
@@ -340,7 +342,6 @@ function setSeg(attr, val) {
   if (attr === 'canvas') { $('scene').className = 'scene ' + val; buildScene(); $('canvas').classList.remove('swap'); void $('canvas').offsetWidth; $('canvas').classList.add('swap'); }
   else $('scene').dataset.bg = val;
 }
-const preview = () => setTimeout(() => $('aprev')?.contentWindow.preview?.(), 450); // solo aquí, no en OBS
 
 // ---------- guardar ----------
 function save() {
@@ -363,11 +364,11 @@ document.addEventListener('input', e => {
   if (i.type === 'checkbox' && i.dataset.k.startsWith('alerts.')) i.closest('.card').classList.toggle('off', !i.checked);
   if (i.dataset.k.endsWith('.theme') || i.dataset.k.endsWith('.fxOn')) showCustom();
   showStats(); save();
-  if (i.dataset.k.startsWith('style.') || i.dataset.k.startsWith('alerts.')) preview();
 });
 document.addEventListener('click', e => {
   const b = e.target.closest('button'); if (!b) return;
   if (b.dataset.test) fetch('/test-alert?ev=' + b.dataset.test, { method: 'POST' });
+  if (b.id === 'undoTests') fetch('/test/undo', { method: 'POST' }).then(() => { b.classList.add('done'); setTimeout(() => b.classList.remove('done'), 900); });
   if (b.dataset.canvas) setSeg('canvas', b.dataset.canvas);
   if (b.dataset.bg) setSeg('bg', b.dataset.bg);
   if ('copy' in b.dataset) { navigator.clipboard.writeText(b.dataset.copy); b.textContent = '✓ Copiado'; b.classList.add('done'); setTimeout(() => { b.textContent = 'Copiar'; b.classList.remove('done'); }, 1200); }
