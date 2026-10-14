@@ -14,7 +14,8 @@ jobs:
         working-directory: tests
       - run: npx playwright install --with-deps chromium
         working-directory: tests
-      - run: node run.js
+      # si falla, el final de la salida sale como aviso (se lee sin abrir el registro)
+      - run: node run.js > salida.txt 2>&1 || { cat salida.txt; echo "::error::$(tail -25 salida.txt | tr -d '\r' | tr '\n' '|')"; exit 1; }
         working-directory: tests
       - uses: actions/upload-artifact@v4
         if: always()
