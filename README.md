@@ -11,15 +11,6 @@ Chat unificado, alertas y metas para OBS. Junta en un solo sitio el chat y los e
 - **Metas** (likes, seguidores, monedas, compartidos) y **ranking de top regaladores**.
 - **Avisos de moderación de TikTok** (por ejemplo, la restricción +18) en grande para que no se te pasen.
 
-## Así se ve
-
-<p align="center">
-  <img src="docs/panel.jpg" width="300" alt="Panel del chat en OBS, con eventos, la sala y el chat de todas las plataformas">
-  <img src="docs/escena.jpg" width="520" alt="Una alerta de regalo, dos metas y el ranking de regaladores sobre el directo">
-</p>
-
-![Página para configurar los widgets, con vista previa](docs/widgets.jpg)
-
 ## Cómo se usa
 
 1. Descarga **Livalyst.zip** de la sección *Releases*, descomprímelo donde quieras y abre **Livalyst.exe**. No hay que instalar nada. La primera vez se abre una bienvenida que te guía para dejarlo listo.
