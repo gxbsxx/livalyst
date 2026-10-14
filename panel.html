@@ -3,15 +3,18 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Livalyst</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&display=swap">
 <style>
   :root {
     --font: "Segoe UI", system-ui, sans-serif; --size: 14px; --weight: 400; --lh: 1.45; --gap: 2px; --emote: 1.8em;
-    --text: #efeff1; --bga: 1; --mut: #8a8a93; --line: #26262c; --panel: #18181b; --acc: #9146ff;
+    --text: #efeff1; --bga: 1; --mut: #a49cc8; --line: #2f2a4d; --panel: #1e1b36; --acc: #fe2c55;
+    /* identidad de Livalyst (la misma que la página de widgets); --text y --bga los cambia el usuario en «Apariencia» */
+    --ink: #15132a; --fg: #eeeaff; --hover: #463f72; --head: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
   }
   * { box-sizing: border-box; }
   [hidden] { display: none !important; }
   ::-webkit-scrollbar { display: none; } /* sin barra de desplazamiento: se sigue pudiendo bajar con la rueda */
-  html { background: rgb(14 14 16 / var(--bga)); }
+  html { background: rgb(21 19 42 / var(--bga)); }
   body { margin: 0; height: 100vh; display: flex; flex-direction: column; background: transparent; color: var(--text);
     font-family: var(--font); font-size: var(--size); font-weight: var(--weight); line-height: var(--lh); overflow: hidden; }
   button { font: inherit; }
@@ -32,14 +35,14 @@
   /* ajustes, aparte: arriba a la derecha */
   .gear { margin-left: auto; display: grid; place-items: center; width: 28px; height: 28px; padding: 0; border-radius: 50%; border: 1px solid var(--line);
     background: #ffffff08; font-size: 14px; cursor: pointer; transition: background .15s, border-color .15s, transform .3s; }
-  .gear:hover { background: #ffffff14; border-color: #3c3c46; transform: rotate(45deg); }
+  .gear:hover { background: #ffffff14; border-color: var(--hover); transform: rotate(45deg); }
   .gear:focus-visible { outline: 2px solid var(--acc); outline-offset: 1px; }
   .tool { display: flex; flex-direction: column; align-items: center; gap: 3px; min-width: 0; padding: 6px 2px 5px; border-radius: 9px;
     border: 1px solid var(--line); background: #ffffff08; color: var(--mut); font: 600 10.5px/1.1 "Segoe UI", system-ui, sans-serif;
     cursor: pointer; text-align: center; transition: background .15s, color .15s, border-color .15s, transform .1s; }
   .tool .ic { font-size: 16px; line-height: 1; }
   .tool .tx { max-width: 100%; overflow-wrap: anywhere; }
-  .tool:hover { color: var(--text); border-color: #3c3c46; background: #ffffff14; }
+  .tool:hover { color: var(--text); border-color: var(--hover); background: #ffffff14; }
   .tool:active { transform: scale(.95); }
   .tool:focus-visible { outline: 2px solid var(--acc); outline-offset: 1px; }
   .tool.pri { color: #fff; border-color: color-mix(in srgb, var(--acc) 60%, transparent); background: color-mix(in srgb, var(--acc) 26%, transparent); }
@@ -158,27 +161,30 @@
 
   /* entradas de TikTok y mensaje destacado */
   #join { position: fixed; left: 8px; bottom: 6px; z-index: 5; pointer-events: none; } /* flota sobre el chat: no le quita sitio */
-  #join span { display: inline-block; padding: 2px 10px; border-radius: 999px; background: #18181bee; box-shadow: 0 2px 8px #0008; font-size: .85em; animation: join 3s ease forwards; }
+  #join span { display: inline-block; padding: 2px 10px; border-radius: 999px; background: #1e1b36ee; box-shadow: 0 2px 8px #0008; font-size: .85em; animation: join 3s ease forwards; }
   #join b { color: #25f4ee; font-weight: 600; }
   @keyframes join { 0% { opacity: 0; transform: translateX(-30px); } 12%, 80% { opacity: 1; transform: none; } 100% { opacity: 0; } }
 
   /* ajustes */
-  dialog { background: var(--panel); color: #efeff1; border: 1px solid var(--line); border-radius: 10px; width: min(96vw, 420px);
+  dialog { background: var(--panel); color: var(--fg); border: 1px solid var(--line); border-radius: 10px; width: min(96vw, 420px);
     max-height: 92vh; padding: 0; font: 13px/1.4 "Segoe UI", system-ui, sans-serif; }
   dialog::backdrop { background: #000a; }
   dialog form { padding: 12px 14px; }
-  dialog h2 { font-size: 15px; margin: 0 0 8px; }
+  dialog h2 { font: 800 17px var(--head); margin: 0 0 8px; }
+  summary { font-family: var(--head); }
+  input[type=checkbox] { accent-color: var(--acc); }
+  .brand { display: grid; width: 22px; height: 22px; flex: none; } .brand svg { width: 100%; height: 100%; }
   details { border: 1px solid var(--line); border-radius: 8px; margin: 6px 0; }
   summary { padding: 8px 10px; cursor: pointer; font-weight: 600; }
   details > div { padding: 0 10px 10px; display: grid; grid-template-columns: 1fr 1fr; gap: 6px 10px; }
   label { display: flex; flex-direction: column; gap: 2px; font-size: 12px; color: var(--mut); }
-  label.ck { flex-direction: row; align-items: center; gap: 6px; color: #efeff1; }
+  label.ck { flex-direction: row; align-items: center; gap: 6px; color: var(--fg); }
   .wide { grid-column: 1 / -1; }
-  input[type=text], input[type=number], select { width: 100%; padding: 5px 6px; background: #0e0e10; border: 1px solid var(--line); color: #efeff1; border-radius: 4px; font: inherit; }
+  input[type=text], input[type=number], select { width: 100%; padding: 5px 6px; background: var(--ink); border: 1px solid var(--line); color: var(--fg); border-radius: 4px; font: inherit; }
   input[type=color] { width: 100%; height: 28px; background: none; border: 1px solid var(--line); border-radius: 4px; }
   input[type=range] { width: 100%; }
   .hint { grid-column: 1 / -1; font-size: 11px; color: var(--mut); margin: 0; }
-  .btn { padding: 6px 12px; border-radius: 5px; border: 0; cursor: pointer; background: var(--line); color: #efeff1; }
+  .btn { padding: 6px 12px; border-radius: 5px; border: 0; cursor: pointer; background: var(--line); color: var(--fg); }
   .btn.pri { background: var(--acc); color: #fff; }
   menu { display: flex; justify-content: flex-end; gap: 6px; padding: 0; margin: 10px 0 0; }
   /* editar el directo */
@@ -187,19 +193,19 @@
   #liveForm label { gap: 4px; }
   #liveForm input { padding: 7px 8px; }
   .cnt { align-self: flex-end; font-size: 11px; color: var(--mut); }
-  #liveList { list-style: none; margin: 2px 0 0; padding: 4px; max-height: 236px; overflow: auto; border: 1px solid var(--line); border-radius: 6px; background: #0e0e10; }
-  #liveList li { display: flex; align-items: center; gap: 8px; padding: 4px 6px; border-radius: 4px; color: #efeff1; cursor: pointer; }
+  #liveList { list-style: none; margin: 2px 0 0; padding: 4px; max-height: 236px; overflow: auto; border: 1px solid var(--line); border-radius: 6px; background: var(--ink); }
+  #liveList li { display: flex; align-items: center; gap: 8px; padding: 4px 6px; border-radius: 4px; color: var(--fg); cursor: pointer; }
   #liveList li:hover, #liveList li[aria-selected=true] { background: var(--line); }
   #liveList img { width: 26px; height: 36px; border-radius: 3px; object-fit: cover; flex: none; }
   #liveMsg:empty { display: none; }
-  .tkrow { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; padding: 8px 10px; border-radius: 8px; background: #0e0e10; font-size: 12px; color: var(--mut); }
+  .tkrow { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; padding: 8px 10px; border-radius: 8px; background: var(--ink); font-size: 12px; color: var(--mut); }
   #tkOpen { border: 1px solid #25f4ee; background: none; color: #25f4ee; }
   #tkOpen:hover { background: #25f4ee; color: #000; }
   #liveMsg.ok { color: #53fc18; } #liveMsg.bad { color: #ff6b81; }
 </style>
 <body>
 <header id="head">
-  <div class="hrow"><span id="st"></span><span id="views"></span><button class="gear" id="gear" title="Ajustes: cuentas, apariencia, filtros y eventos" aria-label="Ajustes">⚙️</button></div>
+  <div class="hrow"><span class="brand" title="Livalyst"><svg viewBox="0 0 512 512" aria-hidden="true"><rect width="512" height="512" rx="128" fill="#f2efe9"/><rect x="76" y="120" width="190" height="272" rx="48" fill="#15132a"/><path d="M128.3 330V178.2H165.4V330ZM135 330V298.9H227.2V330Z" fill="#f2efe9"/><path d="M298 160h96a48 48 0 0 1 48 48v84a48 48 0 0 1-48 48h-46l-44 38v-38h-6a48 48 0 0 1-48-48v-84a48 48 0 0 1 48-48z" fill="#fe2c55"/><path d="M327 302 297.6 212.4H328.1L345.1 280.6H348L365.3 212.4H394.4L364.8 302Z" fill="#f2efe9"/></svg></span><span id="st"></span><span id="views"></span><button class="gear" id="gear" title="Ajustes: cuentas, apariencia, filtros y eventos" aria-label="Ajustes">⚙️</button></div>
   <nav class="tools" aria-label="Acciones">
     <button class="tool pri" id="liveBtn" title="Cambiar el título y la categoría del directo"><span class="ic" aria-hidden="true">✏️</span><span class="tx">Editar directo</span></button>
     <button class="tool" id="testBtn" title="Enviar mensajes y eventos de prueba al chat"><span class="ic" aria-hidden="true">🧪</span><span class="tx">Probar</span></button>
