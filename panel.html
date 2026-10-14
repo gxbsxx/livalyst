@@ -172,13 +172,22 @@
   dialog form { padding: 12px 14px; }
   dialog h2 { font: 800 17px var(--head); margin: 0 0 8px; }
   summary { font-family: var(--head); }
-  input[type=checkbox] { accent-color: var(--acc); }
+  /* casillas de los ajustes como interruptores (igual que en la página de widgets) */
+  dialog input[type=checkbox] { appearance: none; flex: none; position: relative; width: 34px; height: 19px; margin: 0; border-radius: 99px; background: var(--hover); cursor: pointer; transition: background .2s; }
+  dialog input[type=checkbox]::after { content: ''; position: absolute; top: 3px; left: 3px; width: 13px; height: 13px; border-radius: 50%; background: #fff; box-shadow: 0 1px 3px #0006; transition: transform .2s; }
+  dialog input[type=checkbox]:checked { background: var(--acc); }
+  dialog input[type=checkbox]:checked::after { transform: translateX(15px); }
+  dialog input[type=checkbox]:focus-visible { outline: 2px solid var(--acc); outline-offset: 2px; }
+  /* nombre de cada plataforma con su logo en «Cuentas» */
+  .pt { display: flex; align-items: center; gap: 6px; }
+  .pt img { width: 16px; height: 16px; border-radius: 4px; }
+  .pt .p { font-size: 9px; padding: 1px 4px; border-radius: 4px; }
   .brand { display: grid; width: 22px; height: 22px; flex: none; } .brand svg { width: 100%; height: 100%; }
   details { border: 1px solid var(--line); border-radius: 8px; margin: 6px 0; }
   summary { padding: 8px 10px; cursor: pointer; font-weight: 600; }
   details > div { padding: 0 10px 10px; display: grid; grid-template-columns: 1fr 1fr; gap: 6px 10px; }
   label { display: flex; flex-direction: column; gap: 2px; font-size: 12px; color: var(--mut); }
-  label.ck { flex-direction: row; align-items: center; gap: 6px; color: var(--fg); }
+  label.ck { flex-direction: row; align-items: center; gap: 8px; color: var(--fg); }
   .wide { grid-column: 1 / -1; }
   input[type=text], input[type=number], select { width: 100%; padding: 5px 6px; background: var(--ink); border: 1px solid var(--line); color: var(--fg); border-radius: 4px; font: inherit; }
   input[type=color] { width: 100%; height: 28px; background: none; border: 1px solid var(--line); border-radius: 4px; }
@@ -238,10 +247,10 @@
   <form method="dialog" id="form">
     <h2>Ajustes</h2>
     <details open><summary>Cuentas</summary><div>
-      <label>Twitch<input type="text" name="twitch" placeholder="tu_canal"></label>
-      <label>TikTok<input type="text" name="tiktok" placeholder="tu_usuario"></label>
-      <label>YouTube<input type="text" name="youtube" placeholder="@tucanal"></label>
-      <label>Kick<input type="text" name="kick" placeholder="tu_canal"></label>
+      <label><span class="pt" data-p="twitch">Twitch</span><input type="text" name="twitch" placeholder="tu_canal"></label>
+      <label><span class="pt" data-p="tiktok">TikTok</span><input type="text" name="tiktok" placeholder="tu_usuario"></label>
+      <label><span class="pt" data-p="youtube">YouTube</span><input type="text" name="youtube" placeholder="@tucanal"></label>
+      <label><span class="pt" data-p="kick">Kick</span><input type="text" name="kick" placeholder="tu_canal"></label>
       <label class="ck"><input type="checkbox" name="ffz"> FrankerFaceZ</label>
       <label class="ck"><input type="checkbox" name="bttv"> BTTV</label>
       <label class="ck"><input type="checkbox" name="seventv"> 7TV</label>
@@ -331,6 +340,7 @@ const logo = {}; // logos/<plataforma>.png|svg si existen; si no, etiqueta de te
 // se espera a saber qué logos hay ANTES de pintar el historial; si no, al recargar salían las siglas
 const logosReady = Promise.all(Object.keys(LABEL).map(p => new Promise(ok => { const i = new Image(); i.onload = () => { logo[p] = i.src; ok(); }; i.onerror = ok; i.src = '/logos/' + p; })));
 
+logosReady.then(() => document.querySelectorAll('.pt').forEach(t => t.prepend(logo[t.dataset.p] ? img(logo[t.dataset.p], '') : el('span', 'p ' + t.dataset.p, LABEL[t.dataset.p]))));
 const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
 const img = (src, alt, cls) => { const i = el('img', cls); i.src = src; i.alt = i.title = alt || ''; i.loading = 'lazy'; return i; };
 const hue = s => `hsl(${[...s].reduce((h, c) => h * 31 + c.charCodeAt(0) | 0, 0) % 360},70%,65%)`;
