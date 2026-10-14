@@ -154,6 +154,7 @@ if (process.argv[2] === 'test') {
 const { TikTokLiveConnection, WebcastEvent } = require('tiktok-live-connector');
 const { LiveChat } = require('youtube-chat');
 
+const firstRun = !fs.existsSync(CFG); // primera vez que se abre Livalyst en este PC
 let saved = {};
 try { saved = JSON.parse(fs.readFileSync(CFG, 'utf8')) || {}; } catch {} // sin config o corrupta: valores por defecto
 let cfg = clean(DEFAULT, saved);
@@ -272,7 +273,7 @@ const server = http.createServer((req, res) => {
   if (url === '/stream' || url === '/stream/categories') return streamRoute(url, req, res);
   if (url === '/open/tiktok' && req.method === 'POST') { // en el navegador normal: dentro de OBS, el inicio de sesión con Google deja una ventana en blanco
     if (process.platform !== 'win32') { res.statusCode = 501; return res.end(); }
-    require('child_process').spawn('rundll32.exe', ['url.dll,FileProtocolHandler', 'https://livecenter.tiktok.com/live_monitor?apply_mode=11'], { detached: true, stdio: 'ignore' }).unref(); // el navegador predeterminado, sea cual sea
+    openUrl('https://livecenter.tiktok.com/live_monitor?apply_mode=11');
     return res.end('ok');
   }
   if (url === '/config') { res.setHeader('content-type', 'application/json'); return res.end(JSON.stringify(cfg)); }
@@ -803,7 +804,10 @@ server.listen(PORT, () => {
   bootDiag();
   console.log(`Livalyst v${VERSION} en http://localhost:${PORT} (datos en ${DATA})`); restart(); startEventSub();
   bandeja();
+  if (firstRun && process.platform === 'win32' && !process.env.CI) { saveCfg(); openUrl(`http://localhost:${PORT}/widgets#bienvenida`); } // la bienvenida, solo la primera vez
 });
+// Abre una web en el navegador predeterminado, sea cual sea (explorer.exe se lía con las «?»).
+function openUrl(u) { require('child_process').spawn('rundll32.exe', ['url.dll,FileProtocolHandler', u], { detached: true, stdio: 'ignore' }).unref(); }
 // Icono junto al reloj de Windows (build/bandeja.cs). Si ya hay uno, el nuevo se cierra solo.
 function bandeja() {
   const exe = path.join(__dirname, 'LivalystBandeja.exe');
