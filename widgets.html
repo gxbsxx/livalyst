@@ -230,7 +230,7 @@ const custom = l => (l.dataset.custom = '', l); // solo se ve con el tema Person
 const mediaOpts = (re, extra = []) => [['', '— ninguno —'], ...extra, ...media.filter(n => re.test(n)).map(n => [n, n])];
 // Sonidos que trae Livalyst (se fabrican en overlay.html, no son archivos)
 const BUILTIN_SOUNDS = [['campana', '🔔 Campanita'], ['monedas', '🪙 Monedas'], ['fanfarria', '🎺 Fanfarria'], ['burbuja', '🫧 Burbuja'],
-  ['destellos', '✨ Destellos'], ['arpa', '🎵 Arpa'], ['marimba', '🥁 Marimba'], ['subida', '🚀 Subida'], ['aplauso', '👏 Aplauso']].map(([k, n]) => ['livalyst:' + k, n]);
+  ['destellos', '✨ Destellos'], ['arpa', '🎵 Arpa'], ['marimba', '🥁 Marimba'], ['subida', '🚀 Subida']].map(([k, n]) => ['livalyst:' + k, n]);
 const SOUND = /\.(mp3|wav|ogg)$/i, IMAGE = /\.(gif|png|jpe?g|webp|webm|mp4|json)$/i; // .json = animación Lottie
 const fonts = FONTS.map(f => [f, f === 'system' ? 'La del sistema' : f]);
 // Dirección para OBS: se enseña sin «http://» para que quepa; el botón copia la completa

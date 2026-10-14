@@ -634,7 +634,7 @@ function next() {
   }, Math.max(1, a.duration) * 1000);
 }
 // Sonidos de Livalyst: se fabrican al momento con el navegador (sin archivos ni derechos de autor).
-// Cada nota: [frecuencia, empieza (s), dura (s), onda, frecuencia final si sube o baja, volumen]. «noise» = ruido (aplauso).
+// Cada nota: [frecuencia, empieza (s), dura (s), onda, frecuencia final si sube o baja, volumen].
 // echo: cantidad de eco · lp: filtro que suaviza los agudos.
 const arp = (fs, gap, len, type, v = 1) => fs.map((f, i) => [f, i * gap, len, type, 0, v]);
 const bell = (f, at, v = 1) => [[f, at, 1.5, 'sine', 0, v], [f * 2.76, at, .4, 'sine', 0, v * .22], [f * 5.4, at, .15, 'sine', 0, v * .08]]; // campana: tono + armónicos que se apagan antes
@@ -648,9 +648,8 @@ const SYNTH = {
   arpa: { echo: .3, lp: 5000, notes: arp([523.3, 659.3, 784, 987.8, 1046.5, 1318.5], .065, 1, 'triangle', .6) },
   marimba: { echo: .1, notes: [[784, 0, .45, 'sine'], [3136, 0, .06, 'sine', 0, .35], [1046.5, .14, .6, 'sine'], [4186, .14, .06, 'sine', 0, .35]] },
   subida: { echo: .2, lp: 3500, notes: [[180, 0, .5, 'square', 1500, .3], [270, .04, .5, 'triangle', 2300, .6], [1568, .5, .5, 'sine', 0, .6]] },
-  aplauso: { notes: Array.from({ length: 34 }, (_, i) => [1200 + (i * 397) % 1400, i * .035 + ((i * 7) % 5) * .006, .07, 'noise', 0, 1.6 - i * .035]) },
 };
-let ac, noise;
+let ac;
 function synth(name, vol) {
   const s = SYNTH[name]; if (!s) return;
   ac ??= new AudioContext();
@@ -661,16 +660,9 @@ function synth(name, vol) {
   if (s.echo) { const d = ac.createDelay(), fb = ac.createGain(); d.delayTime.value = .17; fb.gain.value = s.echo; bus.connect(d); d.connect(fb).connect(d); d.connect(out); }
   for (const [f, at, len, type = 'sine', f2, v = 1] of s.notes) {
     const t = t0 + at, g = ac.createGain();
-    let src;
-    if (type === 'noise') { // ruido filtrado: cada golpe de un aplauso
-      if (!noise) { noise = ac.createBuffer(1, ac.sampleRate, ac.sampleRate); const d = noise.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1; }
-      src = ac.createBufferSource(); src.buffer = noise; const bp = ac.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = f; bp.Q.value = .9;
-      src.connect(bp).connect(g);
-    } else {
-      src = ac.createOscillator(); src.type = type; src.frequency.setValueAtTime(f, t);
-      if (f2) src.frequency.exponentialRampToValueAtTime(f2, t + len);
-      src.connect(g);
-    }
+    const src = ac.createOscillator(); src.type = type; src.frequency.setValueAtTime(f, t);
+    if (f2) src.frequency.exponentialRampToValueAtTime(f2, t + len);
+    src.connect(g);
     g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(v, t + .008); g.gain.exponentialRampToValueAtTime(.001, t + len);
     g.connect(bus); src.start(t); src.stop(t + len + .05);
   }

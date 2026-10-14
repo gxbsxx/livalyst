@@ -5,7 +5,7 @@ Chat unificado, alertas y metas para OBS. Junta en un solo sitio el chat y los e
 ## Qué incluye
 
 - **Panel del chat** para OBS (dock): todos los chats juntos, con emotes de FrankerFaceZ, BTTV y 7TV, eventos (regalos, subs, follows…) y quién ha pasado por tu directo.
-- **Alertas** de regalos, seguidores, subs y compartidos, con 15 temas.
+- **Alertas** de regalos, seguidores, subs y compartidos, con 15 temas y 8 sonidos propios (o los tuyos).
 - **Metas** (likes, seguidores, monedas, compartidos) y **ranking de top regaladores**.
 - **Avisos de moderación de TikTok** (por ejemplo, la restricción +18) en grande para que no se te pasen.
 
