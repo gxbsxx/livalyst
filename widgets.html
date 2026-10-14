@@ -88,18 +88,30 @@
   .row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
 
   /* bienvenida: la primera vez (o desde «Cómo empezar») */
-  #hello { width: min(560px, calc(100vw - 32px)); padding: 28px; border: 1px solid var(--line); border-radius: 18px; background: var(--panel); color: var(--text); box-shadow: 0 24px 80px #0008; }
+  #hello { width: min(640px, calc(100vw - 32px)); padding: 28px; border: 1px solid var(--line); border-radius: 18px; background: var(--panel); color: var(--text); box-shadow: 0 24px 80px #0008; }
   #hello[open] { animation: rise .4s var(--ease); }
   #hello::backdrop { background: #0b0a18cc; backdrop-filter: blur(3px); }
   #hello h2 { margin: 0 0 4px; font: 800 26px/1.15 var(--head); letter-spacing: -.01em; }
   #hello h2 span { color: var(--pink); }
   #hello > p { margin: 0 0 20px; color: var(--mut); }
-  #hello ol { display: grid; gap: 16px; margin: 0 0 24px; padding: 0; list-style: none; counter-reset: paso; }
-  #hello li { display: grid; grid-template-columns: 32px 1fr; gap: 12px; counter-increment: paso; }
-  #hello li::before { content: counter(paso); display: grid; place-items: center; width: 32px; height: 32px; border-radius: 50%; background: var(--raise); border: 1px solid var(--line); font: 800 15px var(--head); }
-  #hello li b { display: block; margin-bottom: 2px; font: 700 15px var(--head); }
-  #hello li p { margin: 0; color: var(--mut); }
-  #hello .url { margin-top: 8px; }
+  #hello h3 { display: flex; align-items: center; gap: 10px; margin: 0; font: 700 17px var(--head); }
+  #hello h3 i { display: grid; place-items: center; width: 26px; height: 26px; border-radius: 50%; background: var(--raise); border: 1px solid var(--line); font: 800 13px var(--head); }
+  #hello h3 + .hint { margin: 4px 0 12px; }
+  #hello .hint i { color: var(--text); }
+  .plats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 24px; }
+  .plat { display: grid; gap: 8px; align-content: start; padding: 14px; border: 1px solid var(--line); border-radius: 12px; background: var(--ink); }
+  .plat.tw { grid-column: 1 / -1; }
+  .plat b { display: flex; align-items: center; gap: 8px; font: 700 14px var(--head); }
+  .plat img { width: 18px; height: 18px; object-fit: contain; }
+  .plat .hint { margin: 0; }
+  .plat a { font-size: 12px; justify-self: start; }
+  .plat input { width: 100%; height: 36px; padding: 0 10px; border: 1px solid var(--line); border-radius: 9px; background: var(--panel); color: var(--text); font: 13px system-ui, sans-serif; }
+  .conn { justify-self: start; background: #9146ff; border-color: #9146ff; color: #fff; }
+  .conn:hover { background: #a970ff; }
+  .conn.ok { background: var(--raise); border-color: var(--line); color: var(--cyan); cursor: default; }
+  @media (max-width: 560px) { .plats { grid-template-columns: 1fr; } }
+  #hello .url { margin: 8px 0 10px; }
+  #hello form { margin-top: 20px; }
   #hello .go { width: 100%; height: 44px; border: 0; background: var(--pink); color: #fff; font: 700 15px var(--head); }
   #hello .go:hover { background: #ff4a6e; }
   /* escena de vista previa: los widgets a su tamaño real de OBS, reducidos para caber */
@@ -213,14 +225,23 @@
 
 <dialog id="hello" aria-labelledby="helloTitle">
   <h2 id="helloTitle">Te damos la bienvenida a Livalyst<span>.</span></h2>
-  <p>Cuatro pasos y lo tienes en tu directo.</p>
-  <ol>
-    <li><div><b>Añade el chat a OBS</b><p>En OBS, abre <i>Docks → Docks de navegador personalizados</i>. Ponle de nombre Livalyst y pega esta dirección:</p>
-      <div class="url"><input readonly value="localhost:8787" aria-label="Dirección del chat"><button data-copy="http://localhost:8787">Copiar</button></div></div></li>
-    <li><div><b>Escribe tus canales</b><p>En el chat, pulsa ⚙️ y, en «Cuentas», pon tu nombre de cada plataforma.</p></div></li>
-    <li><div><b>Conecta tu cuenta de Twitch</b><p>Si haces directo en Twitch, pulsa «Conectar cuenta» en ese mismo apartado. Así llegan los seguidores, las suscripciones y los bits.</p></div></li>
-    <li><div><b>Pon los widgets en tu escena</b><p>En esta página eliges cómo se ven. Copia la dirección de cada uno y añádela en OBS como <i>Fuente de navegador</i>.</p></div></li>
-  </ol>
+  <p>Dos pasos y lo tienes en tu directo.</p>
+  <h3><i>1</i>Dinos dónde haces directo</h3>
+  <p class="hint">Rellena solo las plataformas que uses. Se guarda solo.</p>
+  <div class="plats">
+    <div class="plat tw"><b><img src="/logos/twitch" alt="">Twitch</b>
+      <button type="button" class="conn" id="hTwConn">Conectar con Twitch</button>
+      <p class="hint" id="hTwInfo">Tu canal se rellena solo. Además verás seguidores, suscripciones y bits, y podrás cambiar el título del directo.</p>
+      <a href="#" id="hTwType">Prefiero solo escribir mi canal</a>
+      <input data-h="twitch" placeholder="tu_canal" aria-label="Canal de Twitch" hidden></div>
+    <div class="plat"><b><img src="/logos/tiktok" alt="">TikTok</b><input data-h="tiktok" placeholder="tu_usuario" aria-label="Usuario de TikTok"><p class="hint">Sin iniciar sesión: tu chat es público.</p></div>
+    <div class="plat"><b><img src="/logos/youtube" alt="">YouTube</b><input data-h="youtube" placeholder="@tucanal" aria-label="Canal de YouTube"><p class="hint">Sin iniciar sesión: tu chat es público.</p></div>
+    <div class="plat"><b><img src="/logos/kick" alt="">Kick</b><input data-h="kick" placeholder="tu_canal" aria-label="Canal de Kick"><p class="hint">Sin iniciar sesión: tu chat es público.</p></div>
+  </div>
+  <h3><i>2</i>Ponlo en OBS</h3>
+  <p class="hint">Chat: en OBS, abre <i>Docks → Docks de navegador personalizados</i>, ponle de nombre Livalyst y pega esta dirección.</p>
+  <div class="url"><input readonly value="localhost:8787" aria-label="Dirección del chat"><button data-copy="http://localhost:8787">Copiar</button></div>
+  <p class="hint">Widgets: en esta página eliges cómo se ven. Copia la dirección de cada uno y añádela en OBS como <i>Fuente de navegador</i>.</p>
   <form method="dialog"><button class="go" autofocus>Empezar</button></form>
 </dialog>
 
@@ -435,6 +456,8 @@ async function start() {
     if (d.stats) { stats = d.stats; showStats(); }
     if (d.cfg && !cfg) { cfg = d.cfg; build(); }   // solo la primera vez: así no se pisa lo que estás escribiendo
     else if (d.cfg) cfg = { ...d.cfg, widgets: cfg.widgets };
+    if (d.auth) twOk = d.auth.ok;
+    if (d.cfg || d.auth) fillHello();
   };
   ws.onclose = () => { $('saved').textContent = '⚠ Sin conexión con Livalyst: ábrelo con «Livalyst.exe»'; $('saved').className = 'bad'; setTimeout(start, 3000); };
 }
@@ -454,9 +477,25 @@ $(store('tab') || 'tab-alerts')?.click();
 start();
 
 // bienvenida: se abre con #bienvenida (Livalyst la abre así la primera vez, y el botón «Cómo empezar»)
-const hello = () => { if (location.hash === '#bienvenida' && !$('hello').open) $('hello').showModal(); };
+let twOk = false;
+function fillHello() {
+  if (!cfg) return;
+  document.querySelectorAll('[data-h]').forEach(i => { if (document.activeElement !== i) i.value = cfg[i.dataset.h] || ''; });
+  const b = $('hTwConn'); b.classList.toggle('ok', twOk); b.textContent = twOk ? '✅ Conectado: ' + cfg.twitch : 'Conectar con Twitch';
+  if (twOk) $('hTwType').hidden = $('hTwType').nextElementSibling.hidden = true;
+  else if (cfg.twitch) $('hTwType').click();
+}
+const hello = () => { if (location.hash === '#bienvenida' && !$('hello').open) { fillHello(); $('hello').showModal(); } };
 addEventListener('hashchange', hello); hello();
 $('hello').onclose = () => history.replaceState(null, '', location.pathname);
+$('hTwConn').onclick = () => twOk || window.open('/auth/twitch/start', 'twitch', 'width=520,height=760');
+$('hTwType').onclick = e => { e.preventDefault(); e.target.hidden = true; e.target.nextElementSibling.hidden = false; };
+let helloTimer;
+$('hello').addEventListener('input', e => {
+  const k = e.target.dataset.h; if (!k || !cfg) return;
+  cfg[k] = e.target.value.trim(); clearTimeout(helloTimer);
+  helloTimer = setTimeout(() => fetch('/config', { method: 'POST', body: JSON.stringify(cfg) }), 600);
+});
 </script>
 </body>
 </html>

@@ -770,6 +770,7 @@ function twitchAuthRoute(url, req, res) {
         twAuth = { token, login: v.login, user_id: v.user_id, client_id: v.client_id }; twChattersOk = null;
         fs.writeFileSync(AUTH, JSON.stringify(twAuth));
         startEventSub();
+        if (cfg.twitch.toLowerCase() !== v.login) { cfg.twitch = v.login; saveCfg(); send({ cfg }); restart(); } // tu canal, sin escribirlo
         res.setHeader('content-type', 'application/json'); res.end(JSON.stringify({ login: v.login }));
       } catch (e) { res.statusCode = 400; res.end(typeof e === 'string' ? e : 'datos no válidos'); }
     });
