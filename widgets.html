@@ -227,7 +227,10 @@ function field(label, path, type = 'text', opts) {
   return type === 'checkbox' ? i : mk('label', {}, label, i);
 }
 const custom = l => (l.dataset.custom = '', l); // solo se ve con el tema Personalizado
-const mediaOpts = re => [['', '— ninguno —'], ...media.filter(n => re.test(n)).map(n => [n, n])];
+const mediaOpts = (re, extra = []) => [['', '— ninguno —'], ...extra, ...media.filter(n => re.test(n)).map(n => [n, n])];
+// Sonidos que trae Livalyst (se fabrican en overlay.html, no son archivos)
+const BUILTIN_SOUNDS = [['livalyst:campana', '🔔 Campanita'], ['livalyst:monedas', '🪙 Monedas'], ['livalyst:fanfarria', '🎺 Fanfarria'],
+  ['livalyst:burbuja', '🫧 Burbuja'], ['livalyst:destellos', '✨ Destellos']];
 const SOUND = /\.(mp3|wav|ogg)$/i, IMAGE = /\.(gif|png|jpe?g|webp|webm|mp4|json)$/i; // .json = animación Lottie
 const fonts = FONTS.map(f => [f, f === 'system' ? 'La del sistema' : f]);
 // Dirección para OBS: se enseña sin «http://» para que quepa; el botón copia la completa
@@ -247,7 +250,7 @@ function build() {
     const p = 'alerts.' + k;
     const c = mk('div', { className: 'card' + (W().alerts[k].on ? '' : ' off') }, head(name, field(name + ' activada', p + '.on', 'checkbox')),
       field('Texto', p + '.text'),
-      div2(field('Sonido', p + '.sound', 'select', mediaOpts(SOUND)), field('Volumen', p + '.volume', 'range', { min: 0, max: 100 })),
+      div2(field('Sonido', p + '.sound', 'select', mediaOpts(SOUND, BUILTIN_SOUNDS)), field('Volumen', p + '.volume', 'range', { min: 0, max: 100 })),
       div2(field('Imagen, GIF, vídeo o Lottie', p + '.image', 'select', mediaOpts(IMAGE)), field('Duración (s)', p + '.duration', 'number', { min: 1, max: 60 })));
     if (k === 'gift') c.append(field('Solo regalos de al menos (monedas)', p + '.min', 'number', { min: 0 }));
     return c;

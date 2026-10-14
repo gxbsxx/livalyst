@@ -21,11 +21,11 @@ const DEFAULT = {
 };
 // Widgets de TikTok (alertas y metas). Se configuran en http://localhost:8787/widgets
 function WIDGETS_DEFAULT() {
-  const alert = (text, on = true) => ({ on, text, sound: '', image: '', volume: 80, duration: 5 });
+  const alert = (text, sound, on = true) => ({ on, text, sound: 'livalyst:' + sound, image: '', volume: 80, duration: 5 }); // sonidos de Livalyst: overlay.html
   const goal = (title, target, color) => ({ title, target, step: 0, start: 0, color });
   return {
-    alerts: { gift: { ...alert('{user} ha enviado {gift} x{n}'), min: 1 }, follow: alert('{user} te ha empezado a seguir'),
-      sub: alert('{user} se ha suscrito'), share: alert('{user} ha compartido el directo', false) },
+    alerts: { gift: { ...alert('{user} ha enviado {gift} x{n}', 'monedas'), min: 1 }, follow: alert('{user} te ha empezado a seguir', 'campana'),
+      sub: alert('{user} se ha suscrito', 'fanfarria'), share: alert('{user} ha compartido el directo', 'burbuja', false) },
     style: { theme: 'custom', twitch: false, fxOn: true, fx: 'theme', font: 'Roboto', size: 34, color: '#ffffff', accent: '#fe2c55', anim: 'pop' },
     goals: { likes: goal('Meta de likes', 10000, '#fe2c55'), follows: goal('Meta de seguidores', 50, '#25f4ee'),
       diamonds: goal('Meta de monedas', 1000, '#ffc400'), shares: goal('Meta de compartidos', 20, '#8be04e') },
