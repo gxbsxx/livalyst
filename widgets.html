@@ -143,17 +143,17 @@
         <div class="head"><h3>Aspecto de las alertas</h3></div>
         <div class="two" id="style"></div>
         <div class="url"><input readonly value="localhost:8787/alertas" aria-label="Dirección para OBS"><button data-copy="http://localhost:8787/alertas">Copiar</button></div>
-        <p class="hint">En OBS: fuente de navegador de 800 × 600. Si la pones más pequeña, la alerta se encoge sola para caber. Marca «Controlar audio a través de OBS» para oír el sonido en el mezclador.</p>
+        <p class="hint">En OBS: fuente de navegador de 800 × 600, con «Controlar audio a través de OBS» marcado para oír el sonido.</p>
       </div>
       <div class="grid" id="alerts"></div>
-      <p class="hint">En el texto puedes usar <code>{user}</code>, <code>{gift}</code>, <code>{n}</code> (cantidad) y <code>{diamonds}</code> (monedas). Sin imagen elegida se muestra el regalo o la foto de perfil.</p>
+      <p class="hint">En el texto puedes usar <code>{user}</code>, <code>{gift}</code>, <code>{n}</code> (cantidad) y <code>{diamonds}</code> (monedas). Sin imagen, sale el regalo o la foto de perfil.</p>
     </div>
 
     <div role="tabpanel" id="p-goals" aria-labelledby="tab-goals" hidden>
       <div class="card look">
         <div class="head"><h3>Aspecto de las metas</h3></div>
         <div class="two" id="gstyle"></div>
-        <p class="hint">En OBS: una fuente de navegador de 600 × 120 por cada meta. Si la letra no cabe, se reduce sola.</p>
+        <p class="hint">En OBS: una fuente de navegador de 600 × 120 por cada meta.</p>
       </div>
       <div class="grid" id="goals"></div>
       <div class="card" id="top"></div>
@@ -169,7 +169,7 @@
         <label>Subir archivos
           <input type="file" id="file" accept=".mp3,.wav,.ogg,.gif,.png,.jpg,.jpeg,.webp,.webm,.mp4,.json" multiple>
         </label>
-        <p class="hint">Se guardan en la carpeta <code>media</code> de Livalyst y aparecen en los desplegables de cada alerta. Admite mp3, wav, ogg, gif, png, jpg, webp, webm y mp4 (hasta 30 MB), y animaciones <b>Lottie</b>: en <b>lottiefiles.com</b> elige una gratis, descárgala como «Lottie JSON» y súbela aquí.</p>
+        <p class="hint">Aparecen en el desplegable de cada alerta. Admite sonido (mp3, wav, ogg), imagen o vídeo (gif, png, jpg, webp, webm, mp4) y animaciones Lottie de <b>lottiefiles.com</b>, hasta 30 MB.</p>
         <div class="hint chips" id="mlist"></div>
       </div>
     </div>
@@ -179,7 +179,7 @@
     <div class="bar">
       <h2>Vista previa</h2>
       <div class="seg" aria-label="Lienzo">
-        <button data-canvas="z" aria-pressed="true">De cerca</button><button data-canvas="h" aria-pressed="false">Horizontal</button><button data-canvas="v" aria-pressed="false">Vertical</button>
+        <button data-canvas="z" aria-pressed="true" title="Los widgets en grande, para ver el diseño">De cerca</button><button data-canvas="h" aria-pressed="false" title="A tamaño real en un lienzo de OBS de 1920 × 1080">Horizontal</button><button data-canvas="v" aria-pressed="false" title="A tamaño real en un lienzo vertical de 1080 × 1920">Vertical</button>
       </div>
       <div class="seg" aria-label="Fondo">
         <button data-bg="dark" aria-pressed="true">Oscuro</button><button data-bg="light" aria-pressed="false">Claro</button><button data-bg="green" aria-pressed="false">Croma</button>
@@ -191,7 +191,7 @@
       <button data-test="sub">⭐ Suscripción</button><button data-test="share">🔁 Compartir</button>
     </div>
     <button id="undoTests" title="Resta de las metas y del ranking lo que han sumado las pruebas (no toca lo real)">↩️ Quitar las pruebas de las metas y el ranking</button>
-    <p class="hint" style="margin:0">«De cerca» enseña los widgets grandes para ver el diseño; «Horizontal» y «Vertical», a su tamaño real dentro del lienzo de OBS. Las metas y el ranking muestran los valores de verdad. «Probar» lo enseña también en OBS y suma a las metas y al ranking; «Quitar las pruebas» lo deja todo como estaba.</p>
+    <p class="hint" style="margin:0">Las metas y el ranking muestran los valores reales. «Probar» también sale en OBS y suma a las metas; «Quitar las pruebas» lo deshace.</p>
   </aside>
 </main>
 
@@ -275,7 +275,7 @@ function build() {
   $('top').replaceChildren(head('🏆 Top regaladores'),
     div2(field('Título', 'top.title'), field('Cuántos enseñar (1-10)', 'top.count', 'number', { min: 1, max: 10 })),
     urlRow('/meta?t=top'),
-    mk('p', { className: 'hint', textContent: 'Quién ha dado más monedas en este directo. Usa el aspecto de las metas. En OBS: fuente de navegador de 600 × 260 (si caben menos filas, la letra se reduce sola). Se pone a cero con las metas.' }));
+    mk('p', { className: 'hint', textContent: 'Quién ha dado más monedas en este directo, con el aspecto de las metas. En OBS: fuente de navegador de 600 × 260.' }));
   document.querySelectorAll('.card, aside > *').forEach((c, i) => c.style.setProperty('--i', Math.min(i, 12)));
   if (document.body.classList.contains('loading')) { // primera vez: todo listo, entra de una vez
     document.body.classList.replace('loading', 'opening'); placeIndicators();
