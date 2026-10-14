@@ -12,9 +12,9 @@ const assert = require('assert');
   await p.waitForTimeout(1500);
   const saved = await p.textContent('#saved');
   const cfg = await (await fetch('http://localhost:8787/config')).json();
+  await p.click('[data-test=gift]'); await p.waitForTimeout(900); // la alerta solo sale al pulsar «Probar»
   const alertTheme = await p.frameLocator('#aprev').locator('html').getAttribute('data-theme');
   const goalTheme = await p.frameLocator('#canvas iframe >> nth=1').locator('html').getAttribute('data-theme');
-  await p.click('[data-test=gift]'); await p.waitForTimeout(900); // la alerta solo sale al pulsar «Probar»
   const card = await p.frameLocator('#aprev').locator('.al').count();
   const obs = await b.newPage(); await obs.goto('http://localhost:8787/meta?t=likes'); await obs.waitForTimeout(800);
   const obsTheme = await obs.locator('html').getAttribute('data-theme');
